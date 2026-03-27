@@ -2,6 +2,18 @@
   "name": "monitoriasredes",
   "version": "1.0.0",
   "description": "",
+  "keywords": [],
+  "homepage": "https://github.com/PortaDoCeu/MonitoriasRedes#readme",
+  "bugs": {
+    "url": "https://github.com/PortaDoCeu/MonitoriasRedes/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PortaDoCeu/MonitoriasRedes.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -9,24 +21,12 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/PortaDoCeu/MonitoriasRedes.git"
+  "dependencies": {
+    "jsmodbus": "^4.0.10"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/PortaDoCeu/MonitoriasRedes/issues"
-  },
-  "homepage": "https://github.com/PortaDoCeu/MonitoriasRedes#readme",
   "devDependencies": {
     "@types/node": "^25.5.0",
     "tsx": "^4.21.0",
     "typescript": "^6.0.2"
-  },
-  "dependencies": {
-    "jsmodbus": "^4.0.10"
   }
 }

@@ -6,7 +6,7 @@ type SocketConnectOpts = import('node:net').SocketConnectOpts;
 const socket = new Socket();
 
 const options: SocketConnectOpts = {
-    host: '192.168.0.203',
+    host: '192.168.5.17',
     port: 502,
 };
 
