@@ -1,0 +1,56 @@
+menu "L2 TAP Sniffer Configuration"
+
+config EXAMPLE_SNIFFER_PAYLOAD_PREVIEW_BYTES
+    int "Payload preview bytes"
+    range 0 256
+    default 32
+    help
+        Maximum number of payload bytes converted to hex and emitted in the
+        JSON payload preview field for each captured frame.
+
+config EXAMPLE_SNIFFER_MAX_FRAME_LEN
+    int "Maximum captured frame length"
+    range 64 2048
+    default 1600
+    help
+        Size of the per-task receive buffer used for L2 TAP reads.
+
+config EXAMPLE_SNIFFER_STATS_PERIOD_MS
+    int "Statistics log period (ms)"
+    range 100 60000
+    default 5000
+    help
+        Periodic interval used by the stats task when printing capture counters.
+
+config EXAMPLE_SNIFFER_RING_BUFFER_SIZE
+    int "Capture ring buffer size (bytes)"
+    range 1024 131072
+    default 16384
+    help
+        Total ring buffer capacity shared between capture and analyzer tasks.
+
+config EXAMPLE_SNIFFER_ETH_POWER_GPIO
+    int "Ethernet PHY power GPIO"
+    range -1 39
+    default 12
+    help
+        GPIO used to enable power for the onboard Ethernet PHY. Set to -1 to
+        disable explicit PHY power control.
+
+config EXAMPLE_SNIFFER_ETH_POWER_UP_DELAY_MS
+    int "Ethernet PHY power-up delay (ms)"
+    range 0 5000
+    default 100
+    help
+        Delay after enabling the PHY power GPIO before starting the Ethernet
+        driver.
+
+config EXAMPLE_SNIFFER_ETH_LINK_UP_TIMEOUT_MS
+    int "Ethernet link-up timeout (ms)"
+    range 1000 60000
+    default 15000
+    help
+        Maximum time to wait for the Ethernet driver to start and report link
+        up before aborting sniffer startup.
+
+endmenu

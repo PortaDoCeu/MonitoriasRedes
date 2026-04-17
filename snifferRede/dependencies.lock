@@ -1,0 +1,23 @@
+dependencies:
+  espressif/rtl8201:
+    component_hash: d9d166a86adcac058297debd9162b0714b4ffe9fb998fad8e0df7dc23efefc20
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=6.0'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    targets:
+    - esp32
+    - esp32p4
+    version: 1.0.1
+  idf:
+    source:
+      type: idf
+    version: 6.0.0
+direct_dependencies:
+- espressif/rtl8201
+manifest_hash: 6561b8c75199c243693e63b9419fb9bcbcae5e45ede3afb162a452e09519c088
+target: esp32
+version: 3.0.0
