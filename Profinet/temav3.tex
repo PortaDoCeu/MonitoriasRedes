@@ -1,0 +1,635 @@
+% !TEX program = xelatex
+%
+% TEMA COASTAL NOITE ────────────────────────────────────────────────────────
+% Paleta base: Cerulean · Tropical Teal · Light Yellow → virada para a noite
+%
+% Sentimento: meia-noite na praia, oceano que brilha sob o luar,
+%   estrelas esparsas, silêncio que se move, água escura com reflexos
+%   prateados, a lua como única fonte de calor — discreta, alta, fria.
+%
+% Decisões estéticas:
+%   • Fundo quase-preto azulado — não preto puro, mas azul de profundidade
+%   • O oceano entra como mancha viva: cerulean escuro com reflexos teal
+%   • A lua é uma presença, não um ícone — halo difuso, centro branco
+%   • Estrelas: pontos irregulares em tamanhos variados, nunca em grade
+%   • O texto é branco-azulado — como areia clara vista de noite
+%   • O coral sai. Entra o prateado-teal como acento único
+% ──────────────────────────────────────────────────────────────────────────
+
+\documentclass[10pt, aspectratio=169]{beamer}
+
+\usetheme[progressbar=none, numbering=none]{metropolis}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{calc, decorations.pathmorphing}
+
+% ── Paleta noturna ────────────────────────────────────────────────────────
+\definecolor{NightSky}{HTML}{070D1A}       % azul-preto do céu de meia-noite
+\definecolor{DeepOcean}{HTML}{0A1628}      % oceano profundo, mais quente que o céu
+\definecolor{Cerulean}{HTML}{0081A7}       % água iluminada, reflexo vivo
+\definecolor{TropicalTeal}{HTML}{00AFB9}   % espuma à luz da lua, crista das ondas
+\definecolor{MoonSilver}{HTML}{C8E8EE}     % luz prateada-fria do luar
+\definecolor{StarWhite}{HTML}{EAF4F7}      % estrelas e texto principal
+\definecolor{MoonGlow}{HTML}{4FB8CC}       % halo lunar, brilho difuso
+\definecolor{OceanSheen}{HTML}{1D5F78}     % reflexo profundo do luar no mar
+\definecolor{WaveLight}{HTML}{7DD4E0}      % crista iluminada, espuma brilhante
+\definecolor{LunarDim}{HTML}{162233}       % sombra nas ondas, profundidade
+
+
+% ── Cores do Beamer ───────────────────────────────────────────────────────
+\setbeamercolor{background canvas}{bg=NightSky}
+\setbeamercolor{normal text}{fg=StarWhite, bg=NightSky}
+\setbeamercolor{frametitle}{fg=MoonSilver, bg=NightSky}
+\setbeamercolor{title}{fg=StarWhite}
+\setbeamercolor{subtitle}{fg=MoonGlow}
+\setbeamercolor{author}{fg=MoonSilver}
+\setbeamercolor{institute}{fg=TropicalTeal}
+\setbeamercolor{date}{fg=WaveLight}
+\setbeamercolor{alerted text}{fg=TropicalTeal}
+\setbeamercolor{block title}{fg=NightSky, bg=OceanSheen}
+\setbeamercolor{block body}{fg=StarWhite, bg=DeepOcean}
+\setbeamercolor{footline}{fg=OceanSheen, bg=NightSky}
+
+
+% ── Fontes ────────────────────────────────────────────────────────────────
+\setbeamerfont{title}{size=\LARGE, series=\bfseries}
+\setbeamerfont{subtitle}{size=\large, series=\mdseries}
+\setbeamerfont{frametitle}{size=\large, series=\bfseries}
+\setbeamerfont{block title}{series=\bfseries, size=\normalsize}
+\setbeamerfont{footline}{size=\tiny}
+
+
+% ── Marcadores: gotas de luz ───────────────────────────────────────────────
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{blocks}[rounded][shadow=false]
+
+\setbeamertemplate{itemize item}{%
+  \tikz[baseline=-0.5ex]{
+    \fill[MoonSilver, opacity=0.30] (0,0) circle (3.2pt);
+    \fill[TropicalTeal]             (0,0) circle (1.6pt);
+  }%
+}
+\setbeamertemplate{itemize subitem}{%
+  \tikz[baseline=-0.5ex]{
+    \fill[WaveLight, opacity=0.28] (0,0) circle (2.6pt);
+    \fill[MoonGlow]                (0,0) circle (1.2pt);
+  }%
+}
+\setbeamertemplate{itemize subsubitem}{%
+  \tikz[baseline=-0.5ex]{
+    \fill[OceanSheen] (0,0) circle (1.8pt);
+  }%
+}
+
+
+% ── Macro interna: semear estrelas ────────────────────────────────────────
+%   Estrelas em posições fixas mas irregulares — nunca em grade.
+%   Tamanhos variados: algumas grandes e brilhantes, muitas pequenas.
+%   Três "classes" de estrela para dar profundidade.
+\newcommand{\drawstars}{%
+  % ── Estrelas grandes (brilhantes, próximas) ──
+  \fill[StarWhite, opacity=0.90] (1.10, 8.20) circle (1.2pt);
+  \fill[StarWhite, opacity=0.85] (3.70, 7.60) circle (1.4pt);
+  \fill[StarWhite, opacity=0.92] (6.20, 8.50) circle (1.1pt);
+  \fill[StarWhite, opacity=0.88] (8.80, 7.90) circle (1.3pt);
+  \fill[StarWhite, opacity=0.80] (11.40,8.30) circle (1.2pt);
+  \fill[StarWhite, opacity=0.86] (13.90,7.50) circle (1.4pt);
+  \fill[StarWhite, opacity=0.91] (15.60,8.10) circle (1.1pt);
+  \fill[StarWhite, opacity=0.84] (2.50, 6.80) circle (1.3pt);
+  \fill[StarWhite, opacity=0.89] (5.10, 7.20) circle (1.2pt);
+  \fill[StarWhite, opacity=0.83] (9.60, 6.60) circle (1.4pt);
+  \fill[StarWhite, opacity=0.87] (12.30,7.10) circle (1.1pt);
+  % ── Estrelas médias ──
+  \fill[MoonSilver, opacity=0.65] (0.60, 7.10) circle (0.8pt);
+  \fill[MoonSilver, opacity=0.60] (2.10, 8.70) circle (0.7pt);
+  \fill[MoonSilver, opacity=0.68] (4.40, 6.40) circle (0.9pt);
+  \fill[MoonSilver, opacity=0.62] (7.00, 7.80) circle (0.8pt);
+  \fill[MoonSilver, opacity=0.70] (7.80, 8.60) circle (0.7pt);
+  \fill[MoonSilver, opacity=0.64] (10.20,6.90) circle (0.9pt);
+  \fill[MoonSilver, opacity=0.66] (10.90,8.00) circle (0.8pt);
+  \fill[MoonSilver, opacity=0.63] (12.80,6.30) circle (0.7pt);
+  \fill[MoonSilver, opacity=0.69] (14.50,6.80) circle (0.9pt);
+  \fill[MoonSilver, opacity=0.61] (15.10,7.40) circle (0.8pt);
+  \fill[MoonSilver, opacity=0.67] (16.00,6.50) circle (0.7pt);
+  \fill[MoonSilver, opacity=0.58] (0.30, 6.20) circle (0.8pt);
+  \fill[MoonSilver, opacity=0.72] (1.80, 7.40) circle (0.7pt);
+  \fill[MoonSilver, opacity=0.60] (3.20, 6.00) circle (0.9pt);
+  \fill[MoonSilver, opacity=0.65] (5.90, 6.70) circle (0.8pt);
+  % ── Estrelas pequenas (distantes, embaçadas) ──
+  \fill[MoonGlow, opacity=0.35] (1.40, 6.50) circle (0.5pt);
+  \fill[MoonGlow, opacity=0.30] (2.90, 7.90) circle (0.5pt);
+  \fill[MoonGlow, opacity=0.38] (4.00, 8.40) circle (0.4pt);
+  \fill[MoonGlow, opacity=0.32] (5.60, 8.00) circle (0.5pt);
+  \fill[MoonGlow, opacity=0.36] (6.80, 6.20) circle (0.4pt);
+  \fill[MoonGlow, opacity=0.29] (8.20, 8.80) circle (0.5pt);
+  \fill[MoonGlow, opacity=0.34] (9.10, 7.30) circle (0.4pt);
+  \fill[MoonGlow, opacity=0.37] (10.60,7.60) circle (0.5pt);
+  \fill[MoonGlow, opacity=0.31] (11.80,6.10) circle (0.4pt);
+  \fill[MoonGlow, opacity=0.33] (13.10,8.20) circle (0.5pt);
+  \fill[MoonGlow, opacity=0.40] (14.00,7.70) circle (0.4pt);
+  \fill[MoonGlow, opacity=0.28] (15.80,8.50) circle (0.5pt);
+  \fill[MoonGlow, opacity=0.35] (16.20,7.20) circle (0.4pt);
+  \fill[MoonGlow, opacity=0.30] (0.80, 8.90) circle (0.5pt);
+}
+
+
+% ── Fundo: noite, oceano, luar ────────────────────────────────────────────
+\setbeamertemplate{background}{
+  \begin{tikzpicture}
+    \useasboundingbox (0,0) rectangle (\paperwidth,\paperheight);
+
+    % ── Base: céu de meia-noite ──
+    \fill[NightSky] (0,0) rectangle (\paperwidth,\paperheight);
+
+    % ── Oceano: ocupa a metade inferior, tom ligeiramente mais quente ──
+    \fill[DeepOcean]
+      (0,0) rectangle (\paperwidth, 4.20);
+
+    % ── Linha do horizonte: onde o mar encontra o céu ──
+    % Levemente ondulada — não uma linha reta
+    \fill[LunarDim]
+      (0, 4.00)
+      .. controls (2.5, 4.10) and (5.0, 3.92) ..
+      (8.0, 4.05)
+      .. controls (11.0,4.15) and (13.5,3.95) ..
+      (\paperwidth, 4.08)
+      -- (\paperwidth, 4.20)
+      -- (0, 4.20)
+      -- cycle;
+
+    % ── Luar: coluna de reflexo no oceano ──
+    % Nasce na lua (canto superior direito) e se alarga ao chegar na água
+    \fill[OceanSheen, opacity=0.28]
+      (11.80, 4.08)
+      .. controls (12.00, 3.40) and (12.80, 2.60) ..
+      (13.20, 1.80)
+      .. controls (13.50, 1.10) and (13.80, 0.50) ..
+      (14.00, 0.00)
+      -- (14.80, 0.00)
+      .. controls (14.60, 0.50) and (14.40, 1.10) ..
+      (14.20, 1.80)
+      .. controls (13.90, 2.60) and (13.40, 3.40) ..
+      (13.20, 4.08)
+      -- cycle;
+
+    \fill[WaveLight, opacity=0.12]
+      (12.20, 4.04)
+      .. controls (12.40, 3.20) and (13.00, 2.20) ..
+      (13.40, 1.20)
+      .. controls (13.60, 0.60) and (13.80, 0.20) ..
+      (13.90, 0.00)
+      -- (14.10, 0.00)
+      .. controls (14.10, 0.20) and (14.00, 0.60) ..
+      (13.80, 1.20)
+      .. controls (13.40, 2.20) and (13.00, 3.20) ..
+      (13.10, 4.04)
+      -- cycle;
+
+    % ── Ondas com reflexo lunar: cristas iluminadas ──
+    % Onda 1 — mais próxima, mais brilhante
+    \fill[WaveLight, opacity=0.16]
+      (0, 3.55)
+      .. controls (2.0, 3.42) and (4.5, 3.65) ..
+      (7.0, 3.50)
+      .. controls (9.5, 3.35) and (12.0,3.58) ..
+      (\paperwidth, 3.45)
+      -- (\paperwidth, 3.65)
+      .. controls (12.0, 3.78) and (9.5, 3.55) ..
+      (7.0, 3.70)
+      .. controls (4.5, 3.85) and (2.0, 3.62) ..
+      (0, 3.75)
+      -- cycle;
+
+    % Reflexo brilhante na crista da onda 1 — só na coluna lunar
+    \fill[MoonSilver, opacity=0.22]
+      (11.80, 3.50) .. controls (12.40,3.42) and (13.60,3.48) .. (14.40,3.50)
+      -- (14.40, 3.62) .. controls (13.60,3.68) and (12.40,3.62) .. (11.80,3.62)
+      -- cycle;
+
+    % Onda 2
+    \fill[OceanSheen, opacity=0.20]
+      (0, 2.90)
+      .. controls (3.0, 2.78) and (6.0, 2.98) ..
+      (9.0, 2.84)
+      .. controls (12.0,2.70) and (14.0,2.92) ..
+      (\paperwidth, 2.80)
+      -- (\paperwidth, 2.96)
+      .. controls (14.0, 3.08) and (12.0,2.86) ..
+      (9.0, 3.00)
+      .. controls (6.0, 3.14) and (3.0, 2.94) ..
+      (0, 3.06)
+      -- cycle;
+
+    \fill[MoonSilver, opacity=0.15]
+      (12.10, 2.84) .. controls (12.80,2.76) and (13.80,2.82) .. (14.60,2.84)
+      -- (14.60, 2.94) .. controls (13.80,3.02) and (12.80,2.96) .. (12.10,2.94)
+      -- cycle;
+
+    % Onda 3 — mais distante, mais suave
+    \fill[Cerulean, opacity=0.14]
+      (0, 2.20)
+      .. controls (4.0, 2.10) and (8.0, 2.28) ..
+      (12.0,2.14)
+      .. controls (14.0,2.06) and (15.5,2.20) ..
+      (\paperwidth, 2.12)
+      -- (\paperwidth, 2.24)
+      .. controls (15.5,2.32) and (14.0,2.18) ..
+      (12.0,2.26)
+      .. controls (8.0, 2.40) and (4.0, 2.22) ..
+      (0, 2.32)
+      -- cycle;
+
+    \fill[WaveLight, opacity=0.10]
+      (12.40, 2.14) .. controls (13.00,2.08) and (14.00,2.12) .. (14.80,2.14)
+      -- (14.80, 2.22) .. controls (14.00,2.28) and (13.00,2.24) .. (12.40,2.22)
+      -- cycle;
+
+    % Onda 4 — quase no fundo, sutil
+    \fill[Cerulean, opacity=0.09]
+      (0, 1.40)
+      .. controls (5.0, 1.30) and (10.0,1.48) ..
+      (15.0,1.34)
+      .. controls (15.8,1.28) and (16.4,1.38) ..
+      (\paperwidth, 1.32)
+      -- (\paperwidth, 1.44)
+      .. controls (16.4,1.50) and (15.8,1.40) ..
+      (15.0,1.46)
+      .. controls (10.0,1.60) and (5.0, 1.42) ..
+      (0, 1.52)
+      -- cycle;
+
+    % ── Estrelas ──
+    \drawstars
+
+    % ── Lua: canto superior direito ──
+    % Halo externo difuso
+    \fill[MoonGlow, opacity=0.07]
+      (14.80, 8.40) circle (1.10);
+    % Halo médio
+    \fill[MoonGlow, opacity=0.14]
+      (14.80, 8.40) circle (0.72);
+    % Halo interno
+    \fill[MoonSilver, opacity=0.28]
+      (14.80, 8.40) circle (0.42);
+    % Disco lunar
+    \fill[StarWhite, opacity=0.92]
+      (14.80, 8.40) circle (0.24);
+
+    % ── Névoa marítima: faixa translúcida no horizonte ──
+    \fill[NightSky, opacity=0.18]
+      (0, 3.90) rectangle (\paperwidth, 4.30);
+
+  \end{tikzpicture}
+}
+
+
+% ── Cabeçalho: flutuando no céu noturno ───────────────────────────────────
+\setbeamertemplate{frametitle}{
+  \nointerlineskip
+  \begin{beamercolorbox}[
+    wd=\paperwidth,
+    ht=1.10cm,
+    dp=0.30cm,
+    leftskip=0.90cm,
+    rightskip=0.90cm
+  ]{frametitle}
+    \usebeamerfont{frametitle}\insertframetitle
+  \end{beamercolorbox}
+  \begin{tikzpicture}[remember picture, overlay]
+    % Onda tênue sob o título — reflexo de luz na água
+    \draw[TropicalTeal, opacity=0.20, line width=0.5pt]
+      ([yshift=-1.40cm]current page.north west)
+      .. controls
+         ([xshift=3cm,  yshift=-1.33cm]current page.north west) and
+         ([xshift=7cm,  yshift=-1.45cm]current page.north west) ..
+         ([xshift=11cm, yshift=-1.37cm]current page.north west)
+      .. controls
+         ([xshift=14cm, yshift=-1.29cm]current page.north west) and
+         ([xshift=17cm, yshift=-1.43cm]current page.north west) ..
+         ([yshift=-1.38cm]current page.north east);
+    % Lua pequena — marcador de slide, como estrela-guia
+    \fill[MoonSilver, opacity=0.75]
+      ([xshift=0.55cm, yshift=-0.72cm]current page.north west) circle (2.0pt);
+    \fill[MoonGlow, opacity=0.30]
+      ([xshift=0.55cm, yshift=-0.72cm]current page.north west) circle (3.6pt);
+    % Eco teal
+    \fill[TropicalTeal, opacity=0.45]
+      ([xshift=0.92cm, yshift=-0.72cm]current page.north west) circle (1.2pt);
+  \end{tikzpicture}
+}
+
+
+% ── Rodapé: quase invisível como o horizonte de noite ─────────────────────
+\setbeamertemplate{footline}{
+  \ifnum\value{framenumber}=1
+  \else
+    \begin{tikzpicture}[remember picture, overlay]
+      \draw[TropicalTeal, opacity=0.15, line width=0.4pt]
+        (current page.south west)
+        .. controls ([xshift=4cm,  yshift=0.20cm]current page.south west) and
+                    ([xshift=8cm,  yshift=0.10cm]current page.south west) ..
+                    ([xshift=12cm, yshift=0.18cm]current page.south west)
+        .. controls ([xshift=15cm, yshift=0.26cm]current page.south west) and
+                    ([xshift=18cm, yshift=0.10cm]current page.south west) ..
+                    (current page.south east);
+    \end{tikzpicture}
+    \begin{beamercolorbox}[
+      wd=\paperwidth,
+      ht=0.28cm,
+      dp=0.14cm,
+      leftskip=0.90cm,
+      rightskip=0.90cm
+    ]{footline}
+      \insertshorttitle\hfill\insertframenumber\,/\,\inserttotalframenumber
+    \end{beamercolorbox}
+  \fi
+}
+
+
+% ── Slide de título ───────────────────────────────────────────────────────
+\setbeamertemplate{title page}{
+  \begin{tikzpicture}[remember picture, overlay]
+
+    % ── Oceano cobrindo a metade inferior ──
+    \fill[DeepOcean]
+      (current page.south west) rectangle
+      ([yshift=4.20cm]current page.south east);
+
+    % ── Horizonte ondulado ──
+    \fill[LunarDim]
+      ([yshift=4.00cm]current page.south west)
+      .. controls ([xshift=3cm,  yshift=4.12cm]current page.south west) and
+                  ([xshift=7cm,  yshift=3.92cm]current page.south west) ..
+                  ([xshift=11cm, yshift=4.06cm]current page.south west)
+      .. controls ([xshift=14cm, yshift=4.16cm]current page.south west) and
+                  ([xshift=17cm, yshift=3.96cm]current page.south west) ..
+                  ([yshift=4.08cm]current page.south east)
+      -- ([yshift=4.25cm]current page.south east)
+      -- ([yshift=4.25cm]current page.south west)
+      -- cycle;
+
+    % ── Coluna de luar no oceano (mais larga no título) ──
+    \fill[OceanSheen, opacity=0.32]
+      ([xshift=10.80cm, yshift=4.08cm]current page.south west)
+      .. controls ([xshift=11.20cm,yshift=3.00cm]current page.south west) and
+                  ([xshift=11.80cm,yshift=2.00cm]current page.south west) ..
+                  ([xshift=12.20cm,yshift=0.00cm]current page.south west)
+      -- ([xshift=14.80cm,yshift=0.00cm]current page.south west)
+      .. controls ([xshift=14.60cm,yshift=2.00cm]current page.south west) and
+                  ([xshift=14.00cm,yshift=3.00cm]current page.south west) ..
+                  ([xshift=13.80cm,yshift=4.08cm]current page.south west)
+      -- cycle;
+
+    \fill[WaveLight, opacity=0.14]
+      ([xshift=11.60cm,yshift=4.04cm]current page.south west)
+      .. controls ([xshift=12.00cm,yshift=2.80cm]current page.south west) and
+                  ([xshift=12.60cm,yshift=1.60cm]current page.south west) ..
+                  ([xshift=13.00cm,yshift=0.00cm]current page.south west)
+      -- ([xshift=14.00cm,yshift=0.00cm]current page.south west)
+      .. controls ([xshift=13.60cm,yshift=1.60cm]current page.south west) and
+                  ([xshift=13.20cm,yshift=2.80cm]current page.south west) ..
+                  ([xshift=13.00cm,yshift=4.04cm]current page.south west)
+      -- cycle;
+
+    % ── Ondas com brilho lunar ──
+    \fill[WaveLight, opacity=0.18]
+      ([yshift=3.52cm]current page.south west)
+      .. controls ([xshift=3cm, yshift=3.38cm]current page.south west) and
+                  ([xshift=6cm, yshift=3.60cm]current page.south west) ..
+                  ([xshift=9cm, yshift=3.44cm]current page.south west)
+      .. controls ([xshift=12cm,yshift=3.28cm]current page.south west) and
+                  ([xshift=15cm,yshift=3.52cm]current page.south west) ..
+                  ([yshift=3.40cm]current page.south east)
+      -- ([yshift=3.58cm]current page.south east)
+      .. controls ([xshift=15cm,yshift=3.68cm]current page.south west) and
+                  ([xshift=12cm,yshift=3.44cm]current page.south west) ..
+                  ([xshift=9cm, yshift=3.60cm]current page.south west)
+      .. controls ([xshift=6cm, yshift=3.76cm]current page.south west) and
+                  ([xshift=3cm, yshift=3.54cm]current page.south west) ..
+                  ([yshift=3.68cm]current page.south west)
+      -- cycle;
+
+    % Brilho da crista na coluna lunar
+    \fill[MoonSilver, opacity=0.28]
+      ([xshift=10.80cm,yshift=3.44cm]current page.south west)
+      .. controls ([xshift=11.60cm,yshift=3.36cm]current page.south west) and
+                  ([xshift=13.40cm,yshift=3.40cm]current page.south west) ..
+                  ([xshift=14.60cm,yshift=3.44cm]current page.south west)
+      -- ([xshift=14.60cm,yshift=3.58cm]current page.south west)
+      .. controls ([xshift=13.40cm,yshift=3.62cm]current page.south west) and
+                  ([xshift=11.60cm,yshift=3.58cm]current page.south west) ..
+                  ([xshift=10.80cm,yshift=3.58cm]current page.south west)
+      -- cycle;
+
+    \fill[OceanSheen, opacity=0.22]
+      ([yshift=2.76cm]current page.south west)
+      .. controls ([xshift=4cm, yshift=2.62cm]current page.south west) and
+                  ([xshift=8cm, yshift=2.80cm]current page.south west) ..
+                  ([xshift=12cm,yshift=2.66cm]current page.south west)
+      .. controls ([xshift=14cm,yshift=2.56cm]current page.south west) and
+                  ([xshift=16cm,yshift=2.70cm]current page.south west) ..
+                  ([yshift=2.60cm]current page.south east)
+      -- ([yshift=2.74cm]current page.south east)
+      .. controls ([xshift=16cm,yshift=2.84cm]current page.south west) and
+                  ([xshift=14cm,yshift=2.70cm]current page.south west) ..
+                  ([xshift=12cm,yshift=2.80cm]current page.south west)
+      .. controls ([xshift=8cm, yshift=2.94cm]current page.south west) and
+                  ([xshift=4cm, yshift=2.76cm]current page.south west) ..
+                  ([yshift=2.90cm]current page.south west)
+      -- cycle;
+
+    \fill[MoonSilver, opacity=0.18]
+      ([xshift=11.20cm,yshift=2.66cm]current page.south west)
+      .. controls ([xshift=12.00cm,yshift=2.58cm]current page.south west) and
+                  ([xshift=13.60cm,yshift=2.62cm]current page.south west) ..
+                  ([xshift=14.80cm,yshift=2.66cm]current page.south west)
+      -- ([xshift=14.80cm,yshift=2.76cm]current page.south west)
+      .. controls ([xshift=13.60cm,yshift=2.80cm]current page.south west) and
+                  ([xshift=12.00cm,yshift=2.76cm]current page.south west) ..
+                  ([xshift=11.20cm,yshift=2.76cm]current page.south west)
+      -- cycle;
+
+    % ── Névoa no horizonte ──
+    \fill[NightSky, opacity=0.22]
+      ([yshift=3.88cm]current page.south west)
+      rectangle ([yshift=4.30cm]current page.south east);
+
+    % ── Estrelas ──
+    \drawstars
+
+    % ── Lua — posição central-alta para o slide de título ──
+    \fill[MoonGlow, opacity=0.07]
+      ([xshift=13.50cm,yshift=7.90cm]current page.south west) circle (1.20);
+    \fill[MoonGlow, opacity=0.14]
+      ([xshift=13.50cm,yshift=7.90cm]current page.south west) circle (0.76);
+    \fill[MoonSilver, opacity=0.30]
+      ([xshift=13.50cm,yshift=7.90cm]current page.south west) circle (0.44);
+    \fill[StarWhite, opacity=0.94]
+      ([xshift=13.50cm,yshift=7.90cm]current page.south west) circle (0.26);
+
+  \end{tikzpicture}
+
+  \vspace*{1.10cm}
+  \begin{minipage}{0.72\paperwidth}
+    \vspace{0.8cm}
+    {\usebeamerfont{title}\usebeamercolor[fg]{title}\inserttitle\par}
+    \vspace{0.32cm}
+    {\usebeamerfont{subtitle}\usebeamercolor[fg]{subtitle}\insertsubtitle\par}
+    \vspace{0.90cm}
+    {\usebeamerfont{author}\usebeamercolor[fg]{author}\insertauthor\par}
+    \vspace{0.10cm}
+    {\small\color{TropicalTeal}\insertinstitute\par}
+    \vspace{0.30cm}
+    {\small\color{WaveLight}\insertdate\par}
+  \end{minipage}
+}
+
+
+% ── Ambientes e macros auxiliares ─────────────────────────────────────────
+
+% Tag de categoria — tom frio, noturno
+\newcommand{\wavetag}[2]{%
+  \tikz[baseline=(t.base)]\node[
+    fill=#1,
+    text=StarWhite,
+    rounded corners=8pt,
+    inner xsep=7pt,
+    inner ysep=2.5pt,
+    font=\scriptsize\bfseries
+  ] (t) {#2};%
+}
+
+% Bloco com fundo oceano profundo e borda teal
+\newenvironment{nightblock}[1]{%
+  \begin{tikzpicture}
+    \node[
+      fill=DeepOcean,
+      draw=TropicalTeal,
+      line width=0.4pt,
+      rounded corners=6pt,
+      inner sep=10pt,
+      text width=\linewidth-24pt
+    ] \bgroup
+      \textbf{\color{MoonSilver}#1}\\[4pt]
+      \color{StarWhite}
+}{%
+    \egroup;
+  \end{tikzpicture}
+}
+
+% Separador: onda fina com ponto lunar
+\newcommand{\wavesection}{%
+  \begin{center}
+  \begin{tikzpicture}
+    \draw[TropicalTeal, opacity=0.30, line width=0.5pt]
+      (0,0)
+      .. controls (0.8, 0.13) and (1.6,-0.09) ..
+      (2.4, 0.07)
+      .. controls (3.2, 0.21) and (4.0,-0.05) ..
+      (4.8, 0.05)
+      .. controls (5.6, 0.17) and (6.4,-0.07) ..
+      (7.2, 0.05);
+    % Ponto lunar no centro
+    \fill[MoonSilver, opacity=0.80] (3.6, 0.06) circle (1.4pt);
+    \fill[MoonGlow, opacity=0.25]   (3.6, 0.06) circle (2.8pt);
+  \end{tikzpicture}
+  \end{center}
+  \vspace{2pt}
+}
+
+% Citação noturna — como pensamento à beira do oceano
+\newenvironment{tidequote}{%
+  \begin{center}
+  \begin{minipage}{0.80\textwidth}
+  \color{MoonGlow}\itshape\small
+  \tikz{\draw[TropicalTeal, line width=0.4pt, opacity=0.45]
+        (0,0) .. controls (0.3,0.08) and (0.7,-0.05) .. (1.0,0.03);}%
+  \hspace{4pt}%
+}{%
+  \hspace{4pt}%
+  \tikz{\draw[MoonSilver, line width=0.4pt, opacity=0.45]
+        (0,0.03) .. controls (0.3,-0.05) and (0.7,0.08) .. (1.0,0);}%
+  \end{minipage}
+  \end{center}
+}
+
+
+% ── Informações ───────────────────────────────────────────────────────────
+\title[Coastal Noite]{Título da Apresentação}
+\subtitle{Subtítulo — meia-noite no oceano}
+\author{Nome do Autor}
+\institute{Instituição}
+\date{2026}
+
+
+% ════════════════════════════════════════════════════════════════════════════
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Slide de conteúdo}
+
+  \wavetag{TropicalTeal}{Conceito}\hspace{0.18cm}
+  \wavetag{OceanSheen}{Detalhe}\hspace{0.18cm}
+  \wavetag{MoonGlow}{Contexto}
+
+  \vspace{0.45cm}
+
+  \begin{columns}[T, totalwidth=\textwidth]
+    \begin{column}{0.46\textwidth}
+      \begin{block}{Primeiro bloco}
+        \begin{itemize}
+          \item Ideia com \alert{destaque teal}.
+          \item Detalhe secundário.
+          \item Observação final.
+        \end{itemize}
+      \end{block}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \begin{block}{Segundo bloco}
+        \begin{itemize}
+          \item Contraponto ou complemento.
+          \item Dados, nuances, exemplos.
+          \item Encerramento da coluna.
+        \end{itemize}
+      \end{block}
+    \end{column}
+  \end{columns}
+
+\end{frame}
+
+\begin{frame}{Pausa}
+
+  \begin{nightblock}{Observação}
+    Este bloco usa fundo oceano profundo com borda teal —
+    como ver o fundo do mar à luz da lua.
+  \end{nightblock}
+
+  \wavesection
+
+  \begin{tidequote}
+    O mar de noite não some — ele aprofunda.
+    A escuridão não apaga a água, revela sua espessura.
+  \end{tidequote}
+
+\end{frame}
+
+\begin{frame}{Fechamento}
+
+  \wavetag{TropicalTeal}{Síntese}
+
+  \vspace{0.50cm}
+
+  \begin{block}{Mensagem final}
+    O que permanece depois da apresentação é como
+    o \alert{reflexo do luar} na água — não a fonte, mas o eco.
+  \end{block}
+
+  \vspace{0.30cm}
+  \wavesection
+
+\end{frame}
+
+\end{document}

@@ -146,6 +146,8 @@ void l2tap_sniffer_eth_stop(l2tap_sniffer_handle_t handle)
 esp_err_t l2tap_sniffer_eth_start(l2tap_sniffer_handle_t handle)
 {
     esp_err_t err;
+    bool enable_promiscuous = true;
+    bool enable_all_multicast = true;
     eth_mac_config_t mac_config = ETH_MAC_DEFAULT_CONFIG();
     eth_phy_config_t phy_config = ETH_PHY_DEFAULT_CONFIG();
     eth_esp32_emac_config_t emac_config = ETH_ESP32_EMAC_DEFAULT_CONFIG();
@@ -224,6 +226,18 @@ esp_err_t l2tap_sniffer_eth_start(l2tap_sniffer_handle_t handle)
         phy->del(phy);
         l2tap_sniffer_eth_stop(handle);
         return err;
+    }
+
+    err = esp_eth_ioctl(handle->eth.handle, ETH_CMD_S_PROMISCUOUS, &enable_promiscuous);
+    if (err != ESP_OK) {
+        ESP_LOGW(TAG, "Unable to enable promiscuous mode: %s", esp_err_to_name(err));
+    } else {
+        ESP_LOGI(TAG, "Ethernet promiscuous mode enabled");
+    }
+
+    err = esp_eth_ioctl(handle->eth.handle, ETH_CMD_S_ALL_MULTICAST, &enable_all_multicast);
+    if (err != ESP_OK) {
+        ESP_LOGW(TAG, "Unable to enable receive-all-multicast mode: %s", esp_err_to_name(err));
     }
 
     handle->eth.glue = esp_eth_new_netif_glue(handle->eth.handle);
