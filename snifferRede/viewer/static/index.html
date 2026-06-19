@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Suspicious Packet Viewer</title>
+  <style>
+    :root {
+      --bg: #f4efe7;
+      --panel: rgba(255, 252, 247, 0.92);
+      --ink: #1d1b1a;
+      --muted: #6f655d;
+      --accent: #b9472d;
+      --accent-soft: #f3d9d2;
+      --line: rgba(29, 27, 26, 0.1);
+      --ok: #2f7d4b;
+      --warn: #a56600;
+      --shadow: 0 18px 50px rgba(41, 27, 16, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(185, 71, 45, 0.14), transparent 34%),
+        radial-gradient(circle at top right, rgba(47, 125, 75, 0.12), transparent 28%),
+        linear-gradient(180deg, #f8f3ec 0%, var(--bg) 100%);
+      min-height: 100vh;
+    }
+
+    .shell {
+      width: min(1180px, calc(100vw - 32px));
+      margin: 24px auto;
+      display: grid;
+      gap: 20px;
+    }
+
+    .hero,
+    .panel {
+      background: var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.75);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .hero {
+      padding: 28px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 5vw, 48px);
+      line-height: 0.98;
+      letter-spacing: -0.04em;
+    }
+
+    .sub {
+      margin: 0;
+      max-width: 72ch;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+    }
+
+    .stat {
+      padding: 18px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid var(--line);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .stat-value {
+      margin-top: 6px;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 380px minmax(0, 1fr);
+      gap: 20px;
+    }
+
+    .panel {
+      overflow: hidden;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-title {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .hint {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .hint.error {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .packet-list {
+      max-height: 70vh;
+      overflow: auto;
+    }
+
+    .packet-item {
+      width: 100%;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      background: transparent;
+      text-align: left;
+      padding: 16px 20px;
+      cursor: pointer;
+      transition: background 140ms ease, transform 140ms ease;
+    }
+
+    .packet-item:hover,
+    .packet-item.active {
+      background: rgba(185, 71, 45, 0.06);
+    }
+
+    .packet-item:last-child {
+      border-bottom: 0;
+    }
+
+    .packet-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+
+    .packet-id {
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .packet-time {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .packet-route {
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 13px;
+      color: var(--ink);
+      word-break: break-word;
+    }
+
+    .packet-meta {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(29, 27, 26, 0.06);
+      color: var(--ink);
+    }
+
+    .tag.ok {
+      background: rgba(47, 125, 75, 0.12);
+      color: var(--ok);
+    }
+
+    .tag.warn {
+      background: rgba(165, 102, 0, 0.12);
+      color: var(--warn);
+    }
+
+    .detail {
+      display: grid;
+      gap: 18px;
+      padding: 20px;
+    }
+
+    .detail-top {
+      display: grid;
+      gap: 10px;
+    }
+
+    .detail-route {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.1;
+      letter-spacing: -0.04em;
+      word-break: break-word;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .detail-card {
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid var(--line);
+    }
+
+    .detail-card .label {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .detail-card .value {
+      margin-top: 6px;
+      font-size: 16px;
+      font-weight: 700;
+      word-break: break-word;
+    }
+
+    pre {
+      margin: 0;
+      padding: 18px;
+      border-radius: 18px;
+      background: #151311;
+      color: #f6efe7;
+      overflow: auto;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .empty {
+      padding: 42px 20px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .packet-list {
+        max-height: 40vh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero">
+      <div class="eyebrow">Suspicious Packet Feed</div>
+      <div>
+        <h1>HTTP alerts from the sniffer, in one page.</h1>
+        <p class="sub">
+          This viewer is independent from the firmware. It receives <code>PUT /suspicious-packet</code>,
+          stores the most recent packets in memory, and refreshes the list automatically.
+        </p>
+      </div>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Packets in memory</div>
+          <div class="stat-value" id="countValue">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Server status</div>
+          <div class="stat-value" id="statusValue">Loading</div>
+        </div>
+          <div class="stat">
+      <div class="stat-label">Last refresh</div>
+      <div class="stat-value" id="refreshValue">--:--:--</div>
+        </div>
+      </div>
+      <div class="hint" id="apiHint">API: loading...</div>
+    </section>
+
+    <section class="layout">
+      <article class="panel">
+        <div class="panel-head">
+          <div class="panel-title">Recent packets</div>
+          <div class="hint" id="limitHint">Keeping last 0</div>
+        </div>
+        <div class="packet-list" id="packetList">
+          <div class="empty">Waiting for the first suspicious packet.</div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head">
+          <div class="panel-title">Packet detail</div>
+          <div class="hint">Selected event payload</div>
+        </div>
+        <div class="detail" id="detailView">
+          <div class="empty">Select a packet from the list.</div>
+        </div>
+      </article>
+    </section>
+  </div>
+
+  <script>
+    const state = {
+      packets: [],
+      selectedId: null,
+    };
+
+    const packetListEl = document.getElementById("packetList");
+    const detailViewEl = document.getElementById("detailView");
+    const countValueEl = document.getElementById("countValue");
+    const statusValueEl = document.getElementById("statusValue");
+    const refreshValueEl = document.getElementById("refreshValue");
+    const limitHintEl = document.getElementById("limitHint");
+    const apiHintEl = document.getElementById("apiHint");
+    const API_BASE_CANDIDATES = (() => {
+      const candidates = [];
+
+      if (window.location.protocol !== "file:") {
+        candidates.push(window.location.origin);
+      }
+
+      candidates.push("http://127.0.0.1:8080");
+      candidates.push("http://localhost:8080");
+
+      return [...new Set(candidates)];
+    })();
+
+    let activeApiBase = API_BASE_CANDIDATES[0];
+    apiHintEl.textContent = `API: ${activeApiBase}/api/packets`;
+
+    function formatDate(value) {
+      return new Date(value).toLocaleString();
+    }
+
+    function formatTime(value) {
+      return new Date(value).toLocaleTimeString();
+    }
+
+    function packetRoute(packet) {
+      const body = packet.packet || {};
+      const src = body.ip_src || body.arp_sender_ip || "unknown";
+      const dst = body.ip_dst || body.arp_target_ip || "unknown";
+      return `${src} -> ${dst}`;
+    }
+
+    function packetBadges(packet) {
+      const body = packet.packet || {};
+      const badges = [];
+
+      if (body.transport) {
+        badges.push(`<span class="tag ok">${escapeHtml(body.transport)}</span>`);
+      }
+
+      if (body.ip_proto) {
+        badges.push(`<span class="tag">${escapeHtml(body.ip_proto)}</span>`);
+      }
+
+      if (body.industrial) {
+        badges.push(`<span class="tag warn">${escapeHtml(body.industrial)}</span>`);
+      }
+
+      if (body.dst_port) {
+        badges.push(`<span class="tag">dst:${escapeHtml(String(body.dst_port))}</span>`);
+      }
+
+      return badges.join("");
+    }
+
+    function escapeHtml(value) {
+      return value
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function renderList() {
+      if (!state.packets.length) {
+        packetListEl.innerHTML = `<div class="empty">Waiting for the first suspicious packet.</div>`;
+        return;
+      }
+
+      packetListEl.innerHTML = state.packets.map((packet) => {
+        const activeClass = packet.id === state.selectedId ? "active" : "";
+        return `
+          <button class="packet-item ${activeClass}" data-id="${packet.id}">
+            <div class="packet-row">
+              <div class="packet-id">#${packet.id}</div>
+              <div class="packet-time">${escapeHtml(formatDate(packet.received_at))}</div>
+            </div>
+            <div class="packet-route">${escapeHtml(packetRoute(packet))}</div>
+            <div class="packet-meta">
+              ${packetBadges(packet)}
+              <span class="tag">from ${escapeHtml(packet.remote_addr)}</span>
+            </div>
+          </button>
+        `;
+      }).join("");
+
+      packetListEl.querySelectorAll(".packet-item").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.selectedId = Number(button.dataset.id);
+          renderList();
+          renderDetail();
+        });
+      });
+    }
+
+    function renderDetail() {
+      const selected = state.packets.find((packet) => packet.id === state.selectedId);
+      if (!selected) {
+        detailViewEl.innerHTML = `<div class="empty">Select a packet from the list.</div>`;
+        return;
+      }
+
+      const body = selected.packet || {};
+      detailViewEl.innerHTML = `
+        <div class="detail-top">
+          <h2 class="detail-route">${escapeHtml(packetRoute(selected))}</h2>
+          <div class="packet-meta">
+            ${packetBadges(selected)}
+            <span class="tag">capture ${escapeHtml(body.capture || "-")}</span>
+            <span class="tag">frame ${escapeHtml(String(body.frame_len || "-"))} B</span>
+          </div>
+        </div>
+        <div class="detail-grid">
+          <div class="detail-card">
+            <div class="label">Received at</div>
+            <div class="value">${escapeHtml(formatDate(selected.received_at))}</div>
+          </div>
+          <div class="detail-card">
+            <div class="label">Source MAC</div>
+            <div class="value">${escapeHtml(body.src_mac || "-")}</div>
+          </div>
+          <div class="detail-card">
+            <div class="label">Destination MAC</div>
+            <div class="value">${escapeHtml(body.dst_mac || "-")}</div>
+          </div>
+          <div class="detail-card">
+            <div class="label">Ports</div>
+            <div class="value">${escapeHtml(`${body.src_port || "-"} -> ${body.dst_port || "-"}`)}</div>
+          </div>
+        </div>
+        <pre>${escapeHtml(JSON.stringify(selected, null, 2))}</pre>
+      `;
+    }
+
+    async function fetchPacketsFrom(baseUrl) {
+      const response = await fetch(`${baseUrl}/api/packets`, { cache: "no-store" });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const payload = await response.json();
+      activeApiBase = baseUrl;
+      apiHintEl.textContent = `API: ${activeApiBase}/api/packets`;
+      return payload;
+    }
+
+    async function fetchPackets() {
+      try {
+        let payload = null;
+        let lastError = null;
+
+        for (const baseUrl of API_BASE_CANDIDATES) {
+          try {
+            payload = await fetchPacketsFrom(baseUrl);
+            break;
+          } catch (error) {
+            lastError = error;
+          }
+        }
+
+        if (!payload) {
+          throw lastError || new Error("No API endpoint reachable");
+        }
+
+        state.packets = payload.packets || [];
+        if (!state.selectedId && state.packets.length) {
+          state.selectedId = state.packets[0].id;
+        }
+        if (state.selectedId && !state.packets.some((packet) => packet.id === state.selectedId)) {
+          state.selectedId = state.packets[0]?.id ?? null;
+        }
+
+        countValueEl.textContent = String(payload.count ?? 0);
+        statusValueEl.textContent = "Online";
+        refreshValueEl.textContent = formatTime(payload.server_time || new Date().toISOString());
+        limitHintEl.textContent = `Keeping last ${payload.max_packets ?? 0}`;
+        apiHintEl.className = "hint";
+
+        renderList();
+        renderDetail();
+      } catch (error) {
+        statusValueEl.textContent = "Offline";
+        apiHintEl.className = "hint error";
+        apiHintEl.textContent = `API unreachable: ${API_BASE_CANDIDATES.join(" or ")}`;
+        console.error(error);
+      }
+    }
+
+    fetchPackets();
+    setInterval(fetchPackets, 1000);
+  </script>
+</body>
+</html>

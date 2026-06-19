@@ -1,0 +1,5 @@
+\beamer@sectionintoc {1}{M\'odulo 1: Fundamentos das Redes Industriais}{3}{0}{1}
+\beamer@sectionintoc {2}{M\'odulo 2: O Tr\'afego de Automa\c {c}\~ao}{14}{0}{2}
+\beamer@sectionintoc {3}{M\'odulo 3: O Tr\'afego de TI na Ind\'ustria}{28}{0}{3}
+\beamer@sectionintoc {4}{M\'odulo 4: Ecossistema Siemens e Acoplamento de CLPs}{38}{0}{4}
+\beamer@sectionintoc {5}{M\'odulo 5: Diagn\'ostico e Ferramentas Pr\'aticas}{51}{0}{5}

@@ -1,0 +1,462 @@
+% !TEX program = xelatex
+%
+% TEMA COASTAL ─────────────────────────────────────────────────────────────
+% Paleta: Cerulean · Tropical Teal · Light Yellow · Soft Apricot · Coral
+% Sentimento: praia no fim de tarde, ondas ao vento, luz que amolece
+%
+% Intenção estética:
+%   • Nada de molduras quadradas ou linhas rígidas — só curvas e fluxo
+%   • O fundo respira: amarelo-creme quente, como areia ainda aquecida
+%   • O mar entra pelos lados como memória, não como estrutura
+%   • O coral aparece como o sol que some — pontual, quente, sem pressa
+% ──────────────────────────────────────────────────────────────────────────
+
+\documentclass[10pt, aspectratio=169]{beamer}
+
+\usetheme[progressbar=none, numbering=none]{metropolis}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{calc, fadings, decorations.pathmorphing}
+
+% ── Paleta ────────────────────────────────────────────────────────────────
+\definecolor{Cerulean}{HTML}{0081A7}       % profundidade, âncora fria
+\definecolor{TropicalTeal}{HTML}{00AFB9}   % superfície, frescor
+\definecolor{LightYellow}{HTML}{FDFCDC}    % areia, luz suave, fundo
+\definecolor{SoftApricot}{HTML}{FED9B7}    % tarde dourada, calor próximo
+\definecolor{VibrantCoral}{HTML}{F07167}   % sol que desce, acento vivo
+\definecolor{DeepSea}{HTML}{005F7A}        % texto sobre fundo claro
+\definecolor{SeaFoam}{HTML}{B8EEF1}        % branco-azulado, espuma
+
+
+% ── Cores do Beamer ───────────────────────────────────────────────────────
+\setbeamercolor{background canvas}{bg=LightYellow}
+\setbeamercolor{normal text}{fg=DeepSea, bg=LightYellow}
+\setbeamercolor{frametitle}{fg=Cerulean, bg=LightYellow}
+\setbeamercolor{title}{fg=Cerulean}
+\setbeamercolor{subtitle}{fg=TropicalTeal}
+\setbeamercolor{author}{fg=DeepSea}
+\setbeamercolor{institute}{fg=TropicalTeal}
+\setbeamercolor{date}{fg=VibrantCoral}
+\setbeamercolor{alerted text}{fg=VibrantCoral}
+\setbeamercolor{block title}{fg=LightYellow, bg=Cerulean}
+\setbeamercolor{block body}{fg=DeepSea, bg=SeaFoam}
+\setbeamercolor{footline}{fg=TropicalTeal, bg=LightYellow}
+\setbeamercolor{section in head/foot}{fg=TropicalTeal}
+
+
+% ── Fontes ────────────────────────────────────────────────────────────────
+\setbeamerfont{title}{size=\LARGE, series=\bfseries}
+\setbeamerfont{subtitle}{size=\large, series=\mdseries}
+\setbeamerfont{frametitle}{size=\large, series=\bfseries}
+\setbeamerfont{block title}{series=\bfseries, size=\normalsize}
+\setbeamerfont{footline}{size=\tiny}
+
+
+% ── Marcadores orgânicos ──────────────────────────────────────────────────
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{blocks}[rounded][shadow=false]
+
+% Item como gota d'água — círculo maior com ponto interno
+\setbeamertemplate{itemize item}{%
+  \tikz[baseline=-0.5ex]{
+    \fill[TropicalTeal!40] (0,0) circle (3.5pt);
+    \fill[TropicalTeal]    (0,0) circle (1.8pt);
+  }%
+}
+\setbeamertemplate{itemize subitem}{%
+  \tikz[baseline=-0.5ex]{
+    \fill[VibrantCoral!35] (0,0) circle (2.8pt);
+    \fill[VibrantCoral]    (0,0) circle (1.4pt);
+  }%
+}
+\setbeamertemplate{itemize subsubitem}{%
+  \tikz[baseline=-0.5ex]{
+    \fill[SoftApricot] (0,0) circle (2pt);
+  }%
+}
+
+
+% ── Fundo: céu + ondas + reflexo do sol ───────────────────────────────────
+%
+%   Filosofia: o fundo não é decoração, é atmosfera.
+%   Três camadas sobrepostas, todas suaves:
+%     1. Reflexo solar no canto superior direito (coral + apricot)
+%     2. Mar silencioso no canto inferior esquerdo (cerulean → teal)
+%     3. Linhas de onda mínimas — o vento passando raso
+%
+\setbeamertemplate{background}{
+  \begin{tikzpicture}
+    \useasboundingbox (0,0) rectangle (\paperwidth,\paperheight);
+
+    % Base: areia / luz amarela
+    \fill[LightYellow] (0,0) rectangle (\paperwidth,\paperheight);
+
+    % ── Reflexo do sol: mancha orgânica, canto superior direito ──
+    \fill[SoftApricot, opacity=0.28]
+      (\paperwidth, \paperheight)
+      .. controls (\paperwidth-3.2, \paperheight+0.4) and (\paperwidth-1.0, \paperheight-2.8) ..
+      (\paperwidth-0.4, \paperheight-4.5)
+      .. controls (\paperwidth+0.6, \paperheight-3.0) and (\paperwidth+0.2, \paperheight-0.8) ..
+      cycle;
+
+    \fill[VibrantCoral, opacity=0.10]
+      (\paperwidth, \paperheight)
+      .. controls (\paperwidth-2.0, \paperheight+0.2) and (\paperwidth-0.5, \paperheight-1.8) ..
+      (\paperwidth-0.3, \paperheight-3.0)
+      .. controls (\paperwidth+0.4, \paperheight-2.0) and (\paperwidth+0.1, \paperheight-0.5) ..
+      cycle;
+
+    % ── Mar: mancha fluida, canto inferior esquerdo ──
+    \fill[Cerulean, opacity=0.16]
+      (0,0)
+      .. controls (0.5, 1.8) and (2.2, 0.6) ..
+      (4.8, 0.8)
+      .. controls (3.5, 2.2) and (1.2, 3.0) ..
+      (0, 3.8)
+      -- cycle;
+
+    \fill[TropicalTeal, opacity=0.13]
+      (0,0)
+      .. controls (0.4, 1.2) and (1.8, 0.4) ..
+      (3.5, 0.5)
+      .. controls (2.4, 1.6) and (0.8, 2.2) ..
+      (0, 2.8)
+      -- cycle;
+
+    % ── Ondas: traços curvos levíssimos, como vento raso ──
+    % (aparecendo na faixa inferior — onde está o "mar")
+    \draw[TropicalTeal, opacity=0.20, line width=0.5pt, rounded corners=8pt]
+      (0.3, 1.05) .. controls (0.9, 0.92) .. (1.6, 1.05);
+    \draw[TropicalTeal, opacity=0.16, line width=0.4pt, rounded corners=8pt]
+      (0.6, 0.72) .. controls (1.4, 0.58) .. (2.2, 0.72);
+    \draw[Cerulean, opacity=0.14, line width=0.4pt, rounded corners=8pt]
+      (1.0, 1.38) .. controls (1.9, 1.22) .. (2.8, 1.38);
+    \draw[TropicalTeal, opacity=0.12, line width=0.35pt, rounded corners=8pt]
+      (0.2, 1.75) .. controls (1.2, 1.60) .. (2.0, 1.75);
+
+    % ── Linha do horizonte: finíssima, quase não existe ──
+    \draw[TropicalTeal, opacity=0.12, line width=0.3pt]
+      (0, 2.90) .. controls (4, 2.78) and (8, 2.92) .. (\paperwidth, 2.85);
+
+  \end{tikzpicture}
+}
+
+
+% ── Cabeçalho do slide: fluido, sem barra ─────────────────────────────────
+%
+%   O título flutua sobre o fundo. Uma onda orgânica muito suave
+%   passa sob ele — não é uma barra, é um reflexo.
+%
+\setbeamertemplate{frametitle}{
+  \nointerlineskip
+  \begin{beamercolorbox}[
+    wd=\paperwidth,
+    ht=1.10cm,
+    dp=0.30cm,
+    leftskip=0.90cm,
+    rightskip=0.90cm
+  ]{frametitle}
+    \usebeamerfont{frametitle}\insertframetitle
+  \end{beamercolorbox}
+  \begin{tikzpicture}[remember picture, overlay]
+    % Onda suave sob o título — como reflexo na água parada
+    \draw[TropicalTeal, opacity=0.25, line width=0.6pt]
+      ([yshift=-1.40cm]current page.north west)
+      .. controls
+         ([xshift=3cm,  yshift=-1.32cm]current page.north west) and
+         ([xshift=7cm,  yshift=-1.46cm]current page.north west) ..
+         ([xshift=11cm, yshift=-1.38cm]current page.north west)
+      .. controls
+         ([xshift=14cm, yshift=-1.30cm]current page.north west) and
+         ([xshift=17cm, yshift=-1.44cm]current page.north west) ..
+         ([yshift=-1.38cm]current page.north east);
+
+    % Ponto coral: o sol no horizonte — pequeno, à esquerda
+    \fill[VibrantCoral, opacity=0.70]
+      ([xshift=0.55cm, yshift=-0.72cm]current page.north west) circle (2.2pt);
+
+    % Eco teal ao lado
+    \fill[TropicalTeal, opacity=0.50]
+      ([xshift=0.90cm, yshift=-0.72cm]current page.north west) circle (1.4pt);
+  \end{tikzpicture}
+}
+
+
+% ── Rodapé minimal ────────────────────────────────────────────────────────
+\setbeamertemplate{footline}{
+  \ifnum\value{framenumber}=1
+  \else
+    \begin{tikzpicture}[remember picture, overlay]
+      % Onda de rodapé — como espuma chegando
+      \draw[TropicalTeal, opacity=0.18, line width=0.5pt]
+        (current page.south west)
+        .. controls ([xshift=4cm,  yshift=0.22cm]current page.south west) and
+                    ([xshift=8cm,  yshift=0.10cm]current page.south west) ..
+                    ([xshift=12cm, yshift=0.20cm]current page.south west)
+        .. controls ([xshift=15cm, yshift=0.30cm]current page.south west) and
+                    ([xshift=18cm, yshift=0.12cm]current page.south west) ..
+                    (current page.south east);
+    \end{tikzpicture}
+    \begin{beamercolorbox}[
+      wd=\paperwidth,
+      ht=0.28cm,
+      dp=0.14cm,
+      leftskip=0.90cm,
+      rightskip=0.90cm
+    ]{footline}
+      \insertshorttitle\hfill\insertframenumber\,/\,\inserttotalframenumber
+    \end{beamercolorbox}
+  \fi
+}
+
+
+% ── Slide de título ───────────────────────────────────────────────────────
+%
+%   Sem moldura. O título emerge do fundo como a costa aparece
+%   no horizonte — gradualmente. O coral marca o sol.
+%   Uma onda ampla atravessa o slide abaixo da metade.
+%
+\setbeamertemplate{title page}{
+  \begin{tikzpicture}[remember picture, overlay]
+
+    % ── Grande onda que atravessa o slide ──
+    % Passa pela metade inferior, como maré subindo
+    \fill[TropicalTeal, opacity=0.08]
+      ([yshift=2.20cm]current page.south west)
+      .. controls ([xshift=3.5cm, yshift=3.20cm]current page.south west) and
+                  ([xshift=7.0cm, yshift=1.80cm]current page.south west) ..
+                  ([xshift=10.5cm,yshift=2.60cm]current page.south west)
+      .. controls ([xshift=13.5cm,yshift=3.30cm]current page.south west) and
+                  ([xshift=16.5cm,yshift=1.90cm]current page.south west) ..
+                  ([yshift=2.40cm]current page.south east)
+      -- (current page.south east)
+      -- (current page.south west)
+      -- cycle;
+
+    \fill[Cerulean, opacity=0.06]
+      ([yshift=1.20cm]current page.south west)
+      .. controls ([xshift=4cm,  yshift=2.10cm]current page.south west) and
+                  ([xshift=9cm,  yshift=0.90cm]current page.south west) ..
+                  ([xshift=13cm, yshift=1.60cm]current page.south west)
+      .. controls ([xshift=15cm, yshift=2.10cm]current page.south west) and
+                  ([xshift=18cm, yshift=1.00cm]current page.south west) ..
+                  ([yshift=1.30cm]current page.south east)
+      -- (current page.south east)
+      -- (current page.south west)
+      -- cycle;
+
+    % ── Traços de onda leves na faixa inferior ──
+    \draw[TropicalTeal, opacity=0.22, line width=0.7pt]
+      ([xshift=0.8cm, yshift=2.50cm]current page.south west)
+      .. controls ([xshift=2.5cm, yshift=2.20cm]current page.south west) ..
+                  ([xshift=4.2cm, yshift=2.50cm]current page.south west);
+    \draw[TropicalTeal, opacity=0.16, line width=0.5pt]
+      ([xshift=2.0cm, yshift=1.80cm]current page.south west)
+      .. controls ([xshift=3.8cm, yshift=1.55cm]current page.south west) ..
+                  ([xshift=5.5cm, yshift=1.80cm]current page.south west);
+    \draw[Cerulean, opacity=0.14, line width=0.5pt]
+      ([xshift=5.5cm, yshift=2.20cm]current page.south west)
+      .. controls ([xshift=7.0cm, yshift=1.95cm]current page.south west) ..
+                  ([xshift=8.5cm, yshift=2.20cm]current page.south west);
+    \draw[TropicalTeal, opacity=0.12, line width=0.4pt]
+      ([xshift=9.5cm, yshift=1.60cm]current page.south west)
+      .. controls ([xshift=11cm, yshift=1.38cm]current page.south west) ..
+                  ([xshift=12.5cm,yshift=1.60cm]current page.south west);
+
+    % ── Reflexo apricot no canto direito — calor do fim de tarde ──
+    \fill[SoftApricot, opacity=0.32]
+      (current page.south east)
+      .. controls ([xshift=-2.0cm, yshift=4.5cm]current page.south east) and
+                  ([xshift=-4.5cm, yshift=1.5cm]current page.south east) ..
+                  ([xshift=-5.5cm, yshift=0.0cm]current page.south east)
+      -- cycle;
+
+    % ── Sol: ponto coral acima do horizonte imaginário ──
+    \fill[VibrantCoral, opacity=0.82]
+      ([xshift=13.5cm, yshift=5.2cm]current page.south west) circle (10pt);
+    \fill[SoftApricot, opacity=0.22]
+      ([xshift=13.5cm, yshift=5.2cm]current page.south west) circle (18pt);
+
+    % ── Linha do horizonte tênue ──
+    \draw[TropicalTeal, opacity=0.20, line width=0.4pt]
+      ([yshift=3.80cm]current page.south west)
+      .. controls ([xshift=5cm, yshift=3.65cm]current page.south west) and
+                  ([xshift=10cm,yshift=3.88cm]current page.south west) ..
+                  ([yshift=3.72cm]current page.south east);
+
+  \end{tikzpicture}
+
+  % Conteúdo textual — flutuando na metade superior
+  \vspace*{1.20cm}
+  \begin{minipage}{0.76\paperwidth}
+    \vspace{0.6cm}
+    {\usebeamerfont{title}\usebeamercolor[fg]{title}\inserttitle\par}
+    \vspace{0.32cm}
+    {\usebeamerfont{subtitle}\usebeamercolor[fg]{subtitle}\insertsubtitle\par}
+    \vspace{0.80cm}
+    {\usebeamerfont{author}\usebeamercolor[fg]{author}\insertauthor\par}
+    \vspace{0.10cm}
+    {\small\color{TropicalTeal}\insertinstitute\par}
+    \vspace{0.30cm}
+    {\small\color{VibrantCoral}\insertdate\par}
+  \end{minipage}
+}
+
+
+% ── Bloco customizado: "onda" ──────────────────────────────────────────────
+%   Use \begin{waveblock}{Título} ... \end{waveblock}
+%   para um bloco com borda esquerda fluida e fundo apricot
+\newenvironment{waveblock}[1]{%
+  \begin{tikzpicture}
+    \node[
+      fill=SoftApricot!45,
+      draw=TropicalTeal,
+      line width=0.4pt,
+      rounded corners=6pt,
+      inner sep=10pt,
+      text width=\linewidth-24pt
+    ] \bgroup
+      \textbf{\color{Cerulean}#1}\\[4pt]
+      \color{DeepSea}
+}{%
+    \egroup;
+  \end{tikzpicture}
+}
+
+% ── Tag de categoria ──────────────────────────────────────────────────────
+%   \wavetag{TropicalTeal}{Conceito}   \wavetag{VibrantCoral}{Destaque}
+\newcommand{\wavetag}[2]{%
+  \tikz[baseline=(t.base)]\node[
+    fill=#1,
+    text=LightYellow,
+    rounded corners=8pt,
+    inner xsep=7pt,
+    inner ysep=2.5pt,
+    font=\scriptsize\bfseries
+  ] (t) {#2};%
+}
+
+% ── Citação / verso ───────────────────────────────────────────────────────
+%   \begin{tidequote} texto \end{tidequote}
+%   Para momentos de pausa — itálico, recuado, cor mar
+\newenvironment{tidequote}{%
+  \begin{center}
+  \begin{minipage}{0.80\textwidth}
+  \color{Cerulean}\itshape\small
+  \tikz{\draw[TropicalTeal, line width=0.5pt, opacity=0.50]
+        (0,0) .. controls (0.3,0.08) and (0.7,-0.05) .. (1.0,0.03);}%
+  \hspace{4pt}%
+}{%
+  \hspace{4pt}%
+  \tikz{\draw[VibrantCoral, line width=0.5pt, opacity=0.50]
+        (0,0.03) .. controls (0.3,-0.05) and (0.7,0.08) .. (1.0,0);}%
+  \end{minipage}
+  \end{center}
+}
+
+% ── Separador de seção visual ─────────────────────────────────────────────
+%   \wavesection — linha ondulada entre seções de conteúdo
+\newcommand{\wavesection}{%
+  \begin{center}
+  \begin{tikzpicture}
+    \draw[TropicalTeal, opacity=0.35, line width=0.6pt]
+      (0,0)
+      .. controls (0.8, 0.14) and (1.6,-0.10) ..
+      (2.4, 0.08)
+      .. controls (3.2, 0.22) and (4.0,-0.06) ..
+      (4.8, 0.04)
+      .. controls (5.6, 0.16) and (6.4,-0.08) ..
+      (7.2, 0.06);
+    \fill[VibrantCoral, opacity=0.60] (3.6, 0.08) circle (1.6pt);
+  \end{tikzpicture}
+  \end{center}
+  \vspace{2pt}
+}
+
+
+% ── Informações da apresentação ───────────────────────────────────────────
+\title[Coastal]{Título da Apresentação}
+\subtitle{Subtítulo — tema e sentimento}
+\author{Nome do Autor}
+\institute{Instituição}
+\date{2026}
+
+
+% ════════════════════════════════════════════════════════════════════════════
+\begin{document}
+
+% ── Título ──────────────────────────────────────────────────────────────
+\begin{frame}
+  \titlepage
+\end{frame}
+
+
+% ── Exemplo: slide com tags e blocos ────────────────────────────────────
+\begin{frame}{Abertura}
+
+  \wavetag{TropicalTeal}{Conceito}\hspace{0.18cm}
+  \wavetag{VibrantCoral}{Destaque}\hspace{0.18cm}
+  \wavetag{Cerulean}{Contexto}
+
+  \vspace{0.45cm}
+
+  \begin{columns}[T, totalwidth=\textwidth]
+    \begin{column}{0.46\textwidth}
+      \begin{block}{Primeiro bloco}
+        \begin{itemize}
+          \item Ideia principal do lado esquerdo.
+          \item Detalhe com \alert{destaque coral}.
+          \item Mais um ponto de observação.
+        \end{itemize}
+      \end{block}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \begin{block}{Segundo bloco}
+        \begin{itemize}
+          \item Contraponto ou complemento.
+          \item Dados, exemplos, nuances.
+          \item Encerramento da coluna.
+        \end{itemize}
+      \end{block}
+    \end{column}
+  \end{columns}
+
+\end{frame}
+
+
+% ── Exemplo: waveblock + citação ────────────────────────────────────────
+\begin{frame}{Pausa e reflexão}
+
+  \begin{waveblock}{Observação central}
+    Este bloco usa fundo apricot e borda teal — calor e frescor
+    lado a lado, como acontece no fim de tarde na beira d'água.
+  \end{waveblock}
+
+  \wavesection
+
+  \begin{tidequote}
+    A maré não pergunta se é hora. Ela simplesmente chega,
+    reorganiza a areia e recua — deixando tudo diferente do que era.
+  \end{tidequote}
+
+\end{frame}
+
+
+% ── Exemplo: slide de fechamento ────────────────────────────────────────
+\begin{frame}{Fechamento}
+
+  \wavetag{VibrantCoral}{Síntese}
+
+  \vspace{0.50cm}
+
+  \begin{block}{Mensagem final}
+    O que fica depois que a apresentação passa é o mesmo que fica
+    depois que a maré recua: não os detalhes, mas a \alert{sensação}.
+  \end{block}
+
+  \vspace{0.30cm}
+  \wavesection
+
+\end{frame}
+
+\end{document}
