@@ -1,0 +1,14 @@
+{
+  "name": "aula1-poo-wireshark",
+  "version": "1.0.0",
+  "description": "Aula 1 (2026.2): POO em JavaScript e Wireshark, cliente/servidor Modbus TCP",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "servidor": "node iniciar-servidor.js",
+    "cliente": "node testar-cliente.js"
+  },
+  "dependencies": {
+    "jsmodbus": "^4.0.10"
+  }
+}
