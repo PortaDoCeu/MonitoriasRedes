@@ -1,0 +1,13 @@
+{
+  "name": "aula2-clp-purdue",
+  "version": "1.0.0",
+  "description": "Aula 2 (2026.2): Modbus TCP em CLP real (S7-1200) e Modelo Purdue",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "cliente": "node testar-cliente.js"
+  },
+  "dependencies": {
+    "jsmodbus": "^4.0.10"
+  }
+}
