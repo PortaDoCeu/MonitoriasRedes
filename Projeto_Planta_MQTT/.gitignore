@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+.pytest_cache/
+config.env
+broker/senhas
+broker/credenciais.md
+broker/_teste.conf
+logs/
+dados/
+aula/projeto_aluno/
+aula/pptx/node_modules/
+aula/pptx/imagens/
+aula/pptx/notas.json

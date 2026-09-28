@@ -1,0 +1,21 @@
+# Regras de acesso do broker da bancada (etapa 2).
+# Troque N pelo número da sua bancada em todos os tópicos.
+#
+# Formato: uma linha "user <nome>" e, abaixo dela, uma linha por permissão:
+#     topic read <tópico>       o usuário pode assinar
+#     topic write <tópico>      o usuário pode publicar
+# O curinga # vale para todos os níveis abaixo: bancadaN/telemetria/#
+# Tudo o que não estiver liberado aqui é proibido.
+
+user gateway
+# TODO: publica telemetria (#), a resposta de comando e o estado do gateway;
+#       assina os dois tópicos de comando (velocidade e motor)
+
+user middleware
+# TODO: só lê, e lê tudo da bancada
+
+user app_leitura
+# TODO: só lê telemetria, respostas de comando e estado do gateway
+
+user operador
+# TODO: lê o mesmo que o app_leitura e publica nos dois tópicos de comando

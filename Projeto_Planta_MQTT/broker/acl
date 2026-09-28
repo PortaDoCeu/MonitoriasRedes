@@ -1,0 +1,46 @@
+# Gerado por broker/criar_usuarios.py. Não edite à mão.
+
+user app_leitura
+topic read +/telemetria/#
+topic read +/comando/resposta
+topic read +/gateway/estado
+
+user app_operador
+topic read +/telemetria/#
+topic read +/comando/resposta
+topic read +/gateway/estado
+topic write +/comando/velocidade
+topic write +/comando/motor
+
+user monitor
+topic readwrite #
+
+user gateway_bancada1
+topic write bancada1/telemetria/#
+topic write bancada1/comando/resposta
+topic write bancada1/gateway/estado
+topic read bancada1/comando/velocidade
+topic read bancada1/comando/motor
+
+user middleware_bancada1
+topic read bancada1/#
+
+user gateway_bancada2
+topic write bancada2/telemetria/#
+topic write bancada2/comando/resposta
+topic write bancada2/gateway/estado
+topic read bancada2/comando/velocidade
+topic read bancada2/comando/motor
+
+user middleware_bancada2
+topic read bancada2/#
+
+user gateway_bancada3
+topic write bancada3/telemetria/#
+topic write bancada3/comando/resposta
+topic write bancada3/gateway/estado
+topic read bancada3/comando/velocidade
+topic read bancada3/comando/motor
+
+user middleware_bancada3
+topic read bancada3/#

@@ -1,0 +1,625 @@
+% !TEX program = xelatex
+%
+% Slides de apoio, Aula 2 (2026.2): Modbus TCP em CLP real e Modelo Purdue.
+% Tema industrial, reaproveitado de Profinet/tema.tex sem alteração de
+% paleta, templates ou macros (o mesmo tema já usado na aula real de
+% PROFINET no repositório). Uso previsto: o monitor conduz a aula olhando
+% para estes slides enquanto os alunos seguem o passo a passo detalhado
+% no notebook Aula2_CLP_Purdue/Aula.ipynb. Por isso o texto aqui é de
+% checkpoint e tabela, não a instrução completa de cada passo.
+
+\documentclass[12pt, aspectratio=169]{beamer}
+
+\usetheme[progressbar=none, numbering=none]{metropolis}
+\usepackage[table]{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{calc,positioning}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{booktabs}
+
+% Paleta visual: industrial, escura, com acentos de sinal (idêntica a
+% Profinet/tema.tex).
+\definecolor{BaseBg}{HTML}{0B1020}
+\definecolor{TopBar}{HTML}{111827}
+\definecolor{PanelBg}{HTML}{172033}
+\definecolor{PanelEdge}{HTML}{233047}
+\definecolor{GridLine}{HTML}{26344F}
+\definecolor{TextPrimary}{HTML}{F8FAFC}
+\definecolor{TextMuted}{HTML}{AAB6C8}
+\definecolor{AccentCyan}{HTML}{16D5D2}
+\definecolor{SignalGreen}{HTML}{7DDC8A}
+\definecolor{SignalAmber}{HTML}{F7B955}
+
+\setbeamercolor{background canvas}{bg=BaseBg}
+\setbeamercolor{normal text}{fg=TextPrimary,bg=BaseBg}
+\setbeamercolor{frametitle}{fg=TextPrimary,bg=TopBar}
+\setbeamercolor{title}{fg=TextPrimary}
+\setbeamercolor{subtitle}{fg=TextMuted}
+\setbeamercolor{author}{fg=TextMuted}
+\setbeamercolor{institute}{fg=TextMuted}
+\setbeamercolor{date}{fg=SignalAmber}
+\setbeamercolor{alerted text}{fg=AccentCyan}
+\setbeamercolor{block title}{fg=TextPrimary,bg=PanelEdge}
+\setbeamercolor{block body}{fg=TextPrimary,bg=PanelBg}
+\setbeamercolor{footline}{fg=TextMuted,bg=BaseBg}
+
+\setbeamerfont{title}{size=\LARGE,series=\bfseries}
+\setbeamerfont{subtitle}{size=\large}
+\setbeamerfont{frametitle}{size=\large,series=\bfseries}
+\setbeamerfont{block title}{series=\bfseries}
+\setbeamerfont{footline}{size=\scriptsize}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{blocks}[rounded][shadow=false]
+\setbeamertemplate{itemize item}{\tikz\fill[AccentCyan] (0,0) circle (1.9pt);}
+\setbeamertemplate{itemize subitem}{\tikz\fill[SignalGreen] (0,0) rectangle (3pt,3pt);}
+
+% Fundo tecnico discreto: grade fina e planos de profundidade.
+\setbeamertemplate{background}{
+    \begin{tikzpicture}
+        \useasboundingbox (0,0) rectangle (\paperwidth,\paperheight);
+        \fill[BaseBg] (0,0) rectangle (\paperwidth,\paperheight);
+
+        \foreach \x in {0,0.55,...,16.6} {
+            \draw[GridLine, opacity=0.18, line width=0.2pt] (\x,0) -- (\x,\paperheight);
+        }
+        \foreach \y in {0,0.55,...,9.4} {
+            \draw[GridLine, opacity=0.18, line width=0.2pt] (0,\y) -- (\paperwidth,\y);
+        }
+
+        \fill[PanelBg, opacity=0.34] (12.45,0) -- (\paperwidth,0) -- (\paperwidth,\paperheight) -- (14.35,\paperheight) -- cycle;
+        \draw[AccentCyan, opacity=0.18, line width=0.8pt] (12.55,0) -- (14.45,\paperheight);
+        \draw[SignalGreen, opacity=0.16, line width=0.8pt] (13.25,0) -- (15.15,\paperheight);
+        \fill[AccentCyan, opacity=0.22] (0,0) rectangle (\paperwidth,0.055);
+    \end{tikzpicture}
+}
+
+\setbeamertemplate{frametitle}{
+    \nointerlineskip
+    \begin{beamercolorbox}[wd=\paperwidth,ht=0.95cm,dp=0.28cm,leftskip=0.82cm,rightskip=0.75cm]{frametitle}
+        \usebeamerfont{frametitle}\insertframetitle
+    \end{beamercolorbox}
+    \begin{tikzpicture}[remember picture,overlay]
+        \fill[AccentCyan] (current page.north west) rectangle ([xshift=0.16cm,yshift=-1.23cm]current page.north west);
+        \fill[SignalGreen] ([xshift=0.16cm]current page.north west) rectangle ([xshift=0.23cm,yshift=-1.23cm]current page.north west);
+        \draw[AccentCyan, opacity=0.5, line width=0.4pt] ([yshift=-1.23cm]current page.north west) -- ([yshift=-1.23cm]current page.north east);
+    \end{tikzpicture}
+}
+
+\setbeamertemplate{footline}{
+    \ifnum\value{framenumber}=1
+    \else
+        \begin{beamercolorbox}[wd=\paperwidth,ht=0.32cm,dp=0.16cm,leftskip=0.85cm,rightskip=0.85cm]{footline}
+            \insertshorttitle\hfill\insertframenumber/\inserttotalframenumber
+        \end{beamercolorbox}
+    \fi
+}
+
+\setbeamertemplate{title page}{
+    \begin{tikzpicture}[remember picture,overlay]
+        \fill[AccentCyan] (current page.north west) rectangle ([xshift=0.18cm]current page.south west);
+        \fill[SignalGreen] ([xshift=0.18cm]current page.north west) rectangle ([xshift=0.25cm]current page.south west);
+        \fill[SignalAmber] ([xshift=0.25cm]current page.north west) rectangle ([xshift=0.30cm]current page.south west);
+
+        \draw[AccentCyan, opacity=0.32, line width=1.1pt] ([xshift=0.85cm,yshift=-1.02cm]current page.north west) -- ([xshift=4.8cm,yshift=-1.02cm]current page.north west);
+        \draw[SignalGreen, opacity=0.30, line width=1.1pt] ([xshift=0.85cm,yshift=-1.22cm]current page.north west) -- ([xshift=3.4cm,yshift=-1.22cm]current page.north west);
+        \draw[SignalAmber, opacity=0.28, line width=1.1pt] ([xshift=0.85cm,yshift=-1.42cm]current page.north west) -- ([xshift=2.3cm,yshift=-1.42cm]current page.north west);
+
+        \node[anchor=south east, text=PanelEdge, opacity=0.42, font=\fontsize{46}{46}\selectfont\bfseries]
+            at ([xshift=-0.55cm,yshift=0.58cm]current page.south east) {MODBUS};
+        \draw[PanelEdge, opacity=0.42, line width=0.5pt]
+            ([xshift=-5.9cm,yshift=1.03cm]current page.south east) rectangle
+            ([xshift=-0.65cm,yshift=2.08cm]current page.south east);
+    \end{tikzpicture}
+
+    \vspace*{1.35cm}
+    \begin{minipage}{0.78\paperwidth}
+        {\usebeamerfont{title}\usebeamercolor[fg]{title}\inserttitle\par}
+        \vspace{0.28cm}
+        {\usebeamerfont{subtitle}\usebeamercolor[fg]{subtitle}\insertsubtitle\par}
+        \vspace{0.72cm}
+        {\usebeamerfont{author}\usebeamercolor[fg]{author}\insertauthor\par}
+        \vspace{0.10cm}
+        {\usebeamerfont{institute}\usebeamercolor[fg]{institute}\insertinstitute\par}
+        \vspace{0.35cm}
+        {\usebeamerfont{date}\usebeamercolor[fg]{date}\insertdate\par}
+    \end{minipage}
+}
+
+\newcommand{\slidechip}[2]{%
+    \tikz[baseline=(chip.base)]\node[
+        fill=#1,
+        text=BaseBg,
+        rounded corners=1.5pt,
+        inner xsep=5pt,
+        inner ysep=2pt,
+        font=\scriptsize\bfseries
+    ] (chip) {#2};%
+}
+
+\newcommand{\routebox}[3]{%
+    \begin{tikzpicture}
+        \node[
+            fill=#1,
+            text=TextPrimary,
+            rounded corners=2pt,
+            minimum width=2.65cm,
+            minimum height=0.82cm,
+            align=center,
+            font=\footnotesize\bfseries
+        ] {#2\\[-1pt]{\scriptsize #3}};
+    \end{tikzpicture}%
+}
+
+% Estilo de tabela: cabeçalho PanelEdge/TextPrimary (mesmo par de cores do
+% block title), corpo PanelBg (mesmo par do block body), regras em AccentCyan.
+\arrayrulecolor{AccentCyan}
+\renewcommand{\arraystretch}{1.25}
+\newcommand{\tblhead}[1]{\textcolor{TextPrimary}{\textbf{#1}}}
+
+% Informacoes da apresentacao
+\title[Aula 2]{Modbus TCP em CLP Real}
+\subtitle{E o Modelo Purdue}
+\author{Gabriel de Oliveira e Silva}
+\institute{Monitoria de Introdução às Redes de Comunicação, UFPE}
+\date{2026.2}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Roteiro da aula}
+  \vspace{0.45cm}
+  \begin{columns}[T, totalwidth=\textwidth]
+    \begin{column}{0.46\textwidth}
+      \begin{block}{Prática com hardware}
+        \begin{itemize}
+          \item Recuperando o cliente.js
+          \item Identificando a biblioteca do CLP
+          \item Configurando o servidor Modbus TCP
+          \item Testando com hardware real
+        \end{itemize}
+      \end{block}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \begin{block}{Análise e teoria}
+        \begin{itemize}
+          \item Wireshark em detalhe
+          \item Modelo Purdue
+          \item Mapeando a bancada
+        \end{itemize}
+      \end{block}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ── Bloco 1 ──────────────────────────────────────────────────────────────────
+\begin{frame}{Bloco 1: recuperando o cliente.js}
+  \vspace{0.4cm}
+  \begin{itemize}
+    \item Mesmo arquivo da Aula 1, nenhuma linha muda hoje
+    \item Classe \texttt{ClienteModbusTCP}: \texttt{conectar}, \texttt{lerRegistradores}, \texttt{escreverRegistradores}, \texttt{encerrar}
+    \item Se a pasta da Aula 1 não estiver disponível, recriar a partir do notebook de hoje
+  \end{itemize}
+\end{frame}
+
+% ── Bloco 2 ──────────────────────────────────────────────────────────────────
+\begin{frame}{Bloco 2: identificando a biblioteca do CLP}
+  \vspace{0.35cm}
+  \begin{tabularx}{\textwidth}{@{}X X@{}}
+    \rowcolor{PanelEdge}
+    \tblhead{Nomes dos parâmetros no bloco} & \tblhead{Biblioteca} \\
+    \midrule
+    \rowcolor{PanelBg}
+    \texttt{dataBuffer}, \texttt{connectParamServer}, \texttt{ndr}, \texttt{dataRead} (minúsculas) &
+    Legada, siga o Caminho A \\
+    \rowcolor{PanelBg}
+    \texttt{MB\_HOLD\_REG}, \texttt{CONNECT}, \texttt{NDR}, \texttt{DR}, \texttt{DISCONNECT} (maiúsculas) &
+    Atual v4.0+, siga o Caminho B \\
+  \end{tabularx}
+
+  \vspace{0.35cm}
+  \begin{itemize}
+    \item Em caso de dúvida: painel de informação do bloco, ícone \textbf{i}
+  \end{itemize}
+\end{frame}
+
+% ── Bloco 3 ──────────────────────────────────────────────────────────────────
+\begin{frame}{Bloco 3: preparação comum}
+  \vspace{0.4cm}
+  \begin{itemize}
+    \item IP do CLP: \emph{Device configuration} $\to$ porta PROFINET $\to$ \emph{Properties $>$ General $>$ Ethernet addresses}
+    \item Criar \texttt{DB\_HoldingRegisters} com \texttt{holdingRegister : Array[0..99] of Word}
+    \item Confirmar \emph{Optimized block access} marcado
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Bloco 3, Caminho A: biblioteca legada}
+  \vspace{0.3cm}
+  \begin{tabularx}{\textwidth}{@{}l X@{}}
+    \rowcolor{PanelEdge}
+    \tblhead{Parâmetro} & \tblhead{Valor / explicação} \\
+    \midrule
+    \rowcolor{PanelBg}
+    \texttt{disconnect} & \texttt{FALSE}, mantém a conexão passiva aberta \\
+    \rowcolor{PanelBg}
+    \texttt{connectParamServer} & estrutura \texttt{TCON\_IP\_v4} \\
+    \rowcolor{PanelBg}
+    \texttt{dataBuffer} & \texttt{DB\_HoldingRegisters.holdingRegister} \\
+  \end{tabularx}
+
+  \vspace{0.25cm}
+  Saídas: \texttt{ndr} (escrita), \texttt{dataRead} (leitura), \texttt{error}, \texttt{status}.
+  Function codes aceitos: 3, 6, 16.
+\end{frame}
+
+\begin{frame}{Bloco 3, Caminho B: biblioteca atual (v4.0+)}
+  \vspace{0.3cm}
+  \begin{tabularx}{\textwidth}{@{}l X@{}}
+    \rowcolor{PanelEdge}
+    \tblhead{Parâmetro} & \tblhead{Valor / explicação} \\
+    \midrule
+    \rowcolor{PanelBg}
+    \texttt{DISCONNECT} & \texttt{FALSE} \\
+    \rowcolor{PanelBg}
+    \texttt{CONNECT} & estrutura \texttt{TCON\_IP\_v4}, parâmetro InOut \\
+    \rowcolor{PanelBg}
+    \texttt{MB\_HOLD\_REG} & \texttt{DB\_HoldingRegisters.holdingRegister}, InOut \\
+  \end{tabularx}
+
+  \vspace{0.25cm}
+  Saídas: \texttt{NDR}, \texttt{DR}, \texttt{ERROR}, \texttt{STATUS}.
+  Function codes aceitos: 1, 2, 3, 4, 5, 6, 8, 11, 15, 16, 23.
+\end{frame}
+
+\begin{frame}{Bloco 3: estrutura TCON\_IP\_v4 (1/2)}
+  \vspace{0.4cm}
+  \begin{tabularx}{\textwidth}{@{}l X@{}}
+    \rowcolor{PanelEdge}
+    \tblhead{Campo} & \tblhead{Valor} \\
+    \midrule
+    \rowcolor{PanelBg}
+    \texttt{InterfaceId} & HW Identifier da interface PROFINET \\
+    \rowcolor{PanelBg}
+    \texttt{ID} & 1 a 4095, único nesse CLP \\
+    \rowcolor{PanelBg}
+    \texttt{ConnectionType} & 11 decimal, fixo para TCP \\
+  \end{tabularx}
+\end{frame}
+
+\begin{frame}{Bloco 3: estrutura TCON\_IP\_v4 (2/2)}
+  \vspace{0.4cm}
+  \begin{tabularx}{\textwidth}{@{}l X@{}}
+    \rowcolor{PanelEdge}
+    \tblhead{Campo} & \tblhead{Valor} \\
+    \midrule
+    \rowcolor{PanelBg}
+    \texttt{ActiveEstablished} & \texttt{FALSE}, o servidor espera a conexão \\
+    \rowcolor{PanelBg}
+    \texttt{RemotePort} & 0, aceita qualquer cliente \\
+    \rowcolor{PanelBg}
+    \texttt{LocalPort} & 502, porta padrão Modbus TCP \\
+  \end{tabularx}
+\end{frame}
+
+\begin{frame}{Bloco 3: compilar e colocar em RUN}
+  \vspace{0.4cm}
+  \begin{itemize}
+    \item \emph{Download to device} $>$ \emph{Hardware and Software (only changes)}
+    \item Colocar a CPU em RUN
+    \item LED RUN verde fixo, sem ERROR nem MAINT piscando
+    \item Se houver erro: checar \texttt{status} ou \texttt{STATUS} numa Watch Table
+  \end{itemize}
+\end{frame}
+
+% ── Bloco 4 ──────────────────────────────────────────────────────────────────
+\begin{frame}{Bloco 4: Watch Table antes de rodar}
+  \vspace{0.4cm}
+  \begin{itemize}
+    \item \emph{Watch and force tables} $>$ \emph{Add new watch table}
+    \item Adicionar \texttt{DB\_HoldingRegisters.holdingRegister[0..3]}
+    \item Clicar no ícone de óculos, \emph{Monitor all}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Bloco 4: rodando o cliente contra o CLP}
+  \vspace{0.35cm}
+  \begin{block}{Saída esperada no terminal}
+    Conectado ao CLP\\
+    Registradores antes: [ 100, 200, 300, 400 ]\\
+    Escrita concluida\\
+    Registradores depois: [ 11, 22, 33, 44 ]
+  \end{block}
+
+  \vspace{0.3cm}
+  Ao mesmo tempo, a Watch Table do TIA Portal mostra os mesmos quatro valores mudando.
+\end{frame}
+
+\begin{frame}{Bloco 4: solução de problemas}
+  \begin{tabularx}{\textwidth}{@{}X X@{}}
+    \rowcolor{PanelEdge}
+    \tblhead{Sintoma} & \tblhead{Causa provável} \\
+    \midrule
+    \rowcolor{PanelBg}
+    \texttt{ECONNREFUSED} & CLP fora do RUN, ou porta configurada diferente de 502 \\
+    \rowcolor{PanelBg}
+    Conexão trava sem erro nem sucesso & notebook e CLP fora da mesma sub-rede, ou cabo na porta errada \\
+    \rowcolor{PanelBg}
+    \texttt{ndr}/\texttt{NDR} nunca vira 1 & buffer não aponta pro DB certo, ou acesso não otimizado \\
+    \rowcolor{PanelBg}
+    LED ERROR aceso & checar \texttt{status}/\texttt{STATUS} na Watch Table \\
+  \end{tabularx}
+\end{frame}
+
+% ── Bloco 5 ──────────────────────────────────────────────────────────────────
+\begin{frame}{Bloco 5: sequência esperada no Wireshark}
+  \vspace{0.3cm}
+  \small
+  \begin{tabularx}{\textwidth}{@{}l l X@{}}
+    \rowcolor{PanelEdge}
+    \tblhead{Grupo} & \tblhead{Pacotes} & \tblhead{Conteúdo} \\
+    \midrule
+    \rowcolor{PanelBg}
+    Handshake TCP & 1 a 3 & SYN, SYN-ACK, ACK \\
+    \rowcolor{PanelBg}
+    Leitura (FC 3) & 4 e 5 & Query e Response \\
+    \rowcolor{PanelBg}
+    Escrita (FC 16) & 6 e 7 & Query e Response \\
+    \rowcolor{PanelBg}
+    Leitura de novo (FC 3) & 8 e 9 & Query e Response \\
+  \end{tabularx}
+\end{frame}
+
+\begin{frame}{Bloco 5: examinando o handshake}
+  \vspace{0.4cm}
+  \begin{itemize}
+    \item Ethernet II: Destination e Source (MAC)
+    \item Internet Protocol Version 4: Source Address, Destination Address, Protocol \texttt{6}
+    \item TCP: Source Port, Destination Port
+    \item TCP Flags: SYN no pacote 1, SYN+ACK no 2, ACK no 3
+    \item Sequence Number e Acknowledgment Number sincronizam os dois lados
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Bloco 5: o cabeçalho MBAP}
+  \vspace{0.4cm}
+  \begin{tabularx}{\textwidth}{@{}l X@{}}
+    \rowcolor{PanelEdge}
+    \tblhead{Campo} & \tblhead{Valor observado} \\
+    \midrule
+    \rowcolor{PanelBg}
+    Transaction Identifier & casa o pedido com a resposta \\
+    \rowcolor{PanelBg}
+    Protocol Identifier & 0, identifica Modbus \\
+    \rowcolor{PanelBg}
+    Unit Identifier & 1 \\
+  \end{tabularx}
+\end{frame}
+
+\begin{frame}{Bloco 5: a PDU de leitura (Function Code 3)}
+  \vspace{0.4cm}
+  \begin{tabularx}{\textwidth}{@{}l X@{}}
+    \rowcolor{PanelEdge}
+    \tblhead{Campo} & \tblhead{Valor observado} \\
+    \midrule
+    \rowcolor{PanelBg}
+    Function Code & 3, Read Holding Registers \\
+    \rowcolor{PanelBg}
+    Reference Number / Word Count & 0 / 4 \\
+    \rowcolor{PanelBg}
+    Resposta: Byte Count e Register 0 a 3 & 8 bytes, valores lidos \\
+  \end{tabularx}
+\end{frame}
+
+\begin{frame}{Bloco 5: PDU de escrita (Function Code 16)}
+  \vspace{0.4cm}
+  \begin{itemize}
+    \item Function Code muda para 16
+    \item PDU do pedido carrega mais campos: Starting Address, Quantity of Registers, Byte Count
+    \item Os valores escritos aparecem um a um, em campos Register N: 11, 22, 33, 44
+    \item A resposta confirma só Starting Address e Quantity, sem repetir os valores
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Bloco 5: o que essa análise mostra}
+  \begin{block}{Sem cifra, sem autenticação}
+    Nenhum campo do MBAP ou da PDU está cifrado.
+    Não existe usuário, senha ou token em nenhuma parte do pacote.
+    Qualquer dispositivo que alcance a porta 502 do CLP pode montar
+    um pacote igual ao pacote 6 e obter o mesmo efeito.
+  \end{block}
+\end{frame}
+
+% ── Bloco 6 ──────────────────────────────────────────────────────────────────
+\begin{frame}{Bloco 6: o que é o modelo Purdue}
+  \vspace{0.4cm}
+  \begin{itemize}
+    \item Purdue Enterprise Reference Architecture
+    \item Organiza a rede industrial em níveis hierárquicos, do processo físico à rede corporativa
+    \item Criado nos anos 90 para manufatura integrada por computador
+    \item Hoje é referência em segurança OT: mostra onde a TI termina e o controle industrial começa
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Bloco 6: os níveis do modelo Purdue (1/2)}
+  \vspace{0.3cm}
+  \small
+  \begin{tabularx}{\textwidth}{@{}l X X@{}}
+    \rowcolor{PanelEdge}
+    \tblhead{Nível} & \tblhead{O que fica ali} & \tblhead{Já visto no período} \\
+    \midrule
+    \rowcolor{PanelBg}
+    0 & processo físico & o processo do CLP de hoje \\
+    \rowcolor{PanelBg}
+    1 & CLP, RTU & o S7-1200 como MB\_SERVER \\
+    \rowcolor{PanelBg}
+    2 & IHM, SCADA & o SCADA do material de Modbus \\
+  \end{tabularx}
+\end{frame}
+
+\begin{frame}{Bloco 6: os níveis do modelo Purdue (2/2)}
+  \vspace{0.3cm}
+  \small
+  \begin{tabularx}{\textwidth}{@{}l X X@{}}
+    \rowcolor{PanelEdge}
+    \tblhead{Nível} & \tblhead{O que fica ali} & \tblhead{Já visto no período} \\
+    \midrule
+    \rowcolor{PanelBg}
+    3 & MES, historian & ainda não visto na prática \\
+    \rowcolor{PanelBg}
+    3.5 & DMZ industrial & não existe hoje na bancada \\
+    \rowcolor{PanelBg}
+    4 & TI da planta & ainda não visto na prática \\
+    \rowcolor{PanelBg}
+    5 & ERP, e-mail, internet & a internet do Bloco 0 \\
+  \end{tabularx}
+\end{frame}
+
+\begin{frame}{Bloco 6: por que isso importa para segurança}
+  \begin{block}{A barreira do Nível 3.5}
+    O tráfego não deveria passar direto do Nível 5 para o Nível 0 ou 1.
+    A DMZ industrial existe para quebrar esse caminho direto.
+    Nada de TI se comunica diretamente com OT, tudo passa por uma
+    zona intermediária com regras explícitas.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Bloco 6: o caso Stuxnet}
+  \begin{block}{Stuxnet, 2010}
+    \itshape
+    CLPs Siemens controlando centrífugas em uma instalação isolada da
+    internet. O malware chegou por pendrives infectados, cruzando
+    exatamente a fronteira entre níveis que o modelo Purdue existe
+    para proteger, e mostrava aos operadores leituras normais enquanto
+    alterava a lógica do controlador.
+  \end{block}
+\end{frame}
+
+\begin{frame}{Bloco 6: o que fica na DMZ industrial}
+  \begin{tabularx}{\textwidth}{@{}l X@{}}
+    \rowcolor{PanelEdge}
+    \tblhead{Componente} & \tblhead{Função} \\
+    \midrule
+    \rowcolor{PanelBg}
+    Réplica do historian & espelha dados do Nível 3 sem acesso direto ao historian real \\
+    \rowcolor{PanelBg}
+    Servidor de patches e antivírus & distribui atualizações sem OT sair para a internet \\
+    \rowcolor{PanelBg}
+    Jump host & ponto único e monitorado de acesso remoto à rede OT \\
+  \end{tabularx}
+
+  \vspace{0.3cm}
+  Regra prática: nenhum equipamento do Nível 4 ou 5 fala direto com o Nível 0, 1, 2 ou 3.
+\end{frame}
+
+\begin{frame}{Bloco 6: zonas e condutos (IEC 62443)}
+  \begin{columns}[T, totalwidth=\textwidth]
+    \begin{column}{0.46\textwidth}
+      \begin{block}{Zona}
+        Agrupamento de ativos que compartilham o mesmo nível de exigência de segurança.
+      \end{block}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      \begin{block}{Conduto}
+        Caminho de comunicação entre zonas, controlado e monitorado, não aberto.
+      \end{block}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Bloco 6: Security Levels (IEC 62443)}
+  \begin{tabularx}{\textwidth}{@{}l X@{}}
+    \rowcolor{PanelEdge}
+    \tblhead{SL} & \tblhead{Resiste a} \\
+    \midrule
+    \rowcolor{PanelBg}
+    0 & nenhuma exigência específica \\
+    \rowcolor{PanelBg}
+    1 & violação casual ou acidental \\
+    \rowcolor{PanelBg}
+    2 & violação intencional, meios simples \\
+    \rowcolor{PanelBg}
+    3 & violação intencional, meios sofisticados \\
+    \rowcolor{PanelBg}
+    4 & ataque com recursos extensos, como um estado \\
+  \end{tabularx}
+\end{frame}
+
+\begin{frame}{Bloco 6: exemplo fora da bancada}
+  \vspace{0.25cm}
+  \small
+  \begin{tabularx}{\textwidth}{@{}l l X@{}}
+    \rowcolor{PanelEdge}
+    \tblhead{Zona} & \tblhead{Nível} & \tblhead{Equipamentos} \\
+    \midrule
+    \rowcolor{PanelBg}
+    Processo & 0 e 1 & bombas, válvulas, CLPs de dosagem \\
+    \rowcolor{PanelBg}
+    Supervisão & 2 & IHM, SCADA local \\
+    \rowcolor{PanelBg}
+    Operações do site & 3 & historian, relatórios \\
+    \rowcolor{PanelBg}
+    DMZ industrial & 3.5 & réplica do historian, jump host \\
+    \rowcolor{PanelBg}
+    TI da concessionária & 4 e 5 & e-mail, ERP, internet \\
+  \end{tabularx}
+\end{frame}
+
+\begin{frame}{Bloco 6: a bancada de hoje}
+  \vspace{0.3cm}
+  \begin{itemize}
+    \item O CLP de hoje corresponde ao Nível 1
+    \item O notebook com o cliente.js deveria operar perto do Nível 1 ou 2, não como um notebook qualquer
+    \item O switch é o meio físico entre os dois
+  \end{itemize}
+
+  \vspace{0.3cm}
+  \begin{block}{Pergunta central}
+    Existe hoje alguma zona ou conduto real entre o notebook e o CLP?
+  \end{block}
+\end{frame}
+
+\begin{frame}{Bloco 6: limitações do modelo}
+  \begin{itemize}
+    \item Redes reais raramente são tão organizadas quanto o diagrama sugere
+    \item Acesso remoto de manutenção, envio de dados para nuvem e integrações de emergência costumam pular níveis inteiros
+    \item Parte do trabalho de segurança OT é comparar a rede desenhada com a rede que existe de fato
+  \end{itemize}
+\end{frame}
+
+% ── Bloco 7 e fechamento ──────────────────────────────────────────────────────
+\begin{frame}{Bloco 7: mapeando a bancada}
+  \vspace{0.35cm}
+  \begin{itemize}
+    \item Listar os equipamentos da montagem de hoje
+    \item Atribuir o nível Purdue de cada um
+    \item Desenhar zonas e condutos, com a direção do tráfego observado
+    \item Indicar se cada conduto tem algum controle real ou é um caminho aberto
+    \item Apontar pelo menos um ponto concreto de segmentação frouxa ou ausente
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Entregável da aula}
+  \vspace{0.4cm}
+  \begin{itemize}
+    \item Diagrama de zonas e condutos da bancada
+    \item Captura Wireshark, com o pacote de escrita identificado
+    \item Resposta: o que impediria, hoje, um notebook qualquer de fazer o mesmo que o cliente.js fez
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Fechamento}
+  \begin{block}{O que ficou desta aula}
+    O mesmo cliente.js da Aula 1 conversou com um CLP real, sem
+    mudar uma linha, e o modelo Purdue nomeou o que já tinha ficado
+    visível na prática: não existe fronteira entre o notebook e o CLP.
+  \end{block}
+
+  \vspace{0.3cm}
+  O diagrama de hoje é o ponto de partida para a modelagem de ameaça completa, na etapa de ataque controlado, sempre em bancada isolada.
+\end{frame}
+
+\end{document}

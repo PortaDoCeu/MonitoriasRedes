@@ -1,0 +1,138 @@
+// FB_Planta: logica da bancada para o Projeto_Planta_MQTT
+// Mesma logica do clp_simulado.py (testado). Contrato: Arquitetura.md, secao 5.
+// ADR-005: seguranca funcional no CLP. ADR-003: premissas de hardware.
+//
+// NAO TESTADO EM CLP REAL. Compilar e testar com a Watch Table antes da aula.
+// Importar: Project tree > External source files > Add new external file >
+// botao direito no arquivo > Generate blocks from source.
+
+FUNCTION_BLOCK "FB_Planta"
+{ S7_Optimized_Access := 'TRUE' }
+VERSION : 0.1
+   VAR_INPUT
+      iTemperatura : Int;      // valor do SM 1231 TC; premissa: graus C x 10 (confirmar no manual)
+      xRemoto : Bool;          // chave local/remoto: TRUE = remoto
+      xEmergenciaOk : Bool;    // contato NF da emergencia: TRUE = sem emergencia
+      xFalhaInversor : Bool;   // saida digital de falha do inversor: TRUE = falha
+   END_VAR
+
+   VAR_OUTPUT
+      qPartida : Bool;         // entrada digital de partida do inversor
+      qReferencia : Int;       // saida analogica 4 a 20 mA (SB 1232 em corrente)
+   END_VAR
+
+   VAR_IN_OUT
+      hr : Array[0..99] of Word;   // "DB_HoldingRegisters".holdingRegister (mesmo DB do MB_SERVER)
+   END_VAR
+
+   VAR
+      tWatchdog : TON_TIME;
+      ultimoHeartbeat : Word;
+      heartbeatAusente : Bool;
+      motorLigado : Bool;
+      codigoFalha : Int;
+   END_VAR
+
+   VAR_TEMP
+      sensorInvalido : Bool;
+      temperaturaAlta : Bool;
+      causaAtiva : Bool;
+      podeLigar : Bool;
+      comando : Int;
+      pedida : DInt;
+      aplicada : DInt;
+      status : Word;
+   END_VAR
+
+   VAR CONSTANT
+      VEL_MAX : DInt := 1700;          // rpm, placa do motor (ADR-003)
+      LIMITE_TEMP : Int := 800;        // 80,0 C
+      TEMP_MIN : Int := -100;          // abaixo disso: leitura invalida
+      TEMP_MAX : Int := 1500;          // acima disso: leitura invalida (inclui 32767 de fio rompido)
+      WATCHDOG : Time := T#3S;
+      AQ_4MA : DInt := 5530;           // 4 mA na faixa 0 a 20 mA (0 a 27648); confirmar
+      AQ_20MA : DInt := 27648;         // 20 mA
+      CMD_PARAR : Int := 0;
+      CMD_LIGAR : Int := 1;
+      CMD_RECONHECER : Int := 2;
+   END_VAR
+
+
+BEGIN
+	// ---------------------------------------------------------------- watchdog do heartbeat (HR12)
+	// Se o gateway parar de mudar HR12 por 3 s, o motor para (ADR-005).
+	IF #hr[12] <> #ultimoHeartbeat THEN
+	    #ultimoHeartbeat := #hr[12];
+	    #tWatchdog(IN := FALSE, PT := #WATCHDOG);
+	END_IF;
+	#tWatchdog(IN := TRUE, PT := #WATCHDOG);
+	#heartbeatAusente := #tWatchdog.Q;
+
+	// ---------------------------------------------------------------- causas de falha (HR4)
+	#sensorInvalido := (#iTemperatura < #TEMP_MIN) OR (#iTemperatura > #TEMP_MAX);
+	#temperaturaAlta := NOT #sensorInvalido AND (#iTemperatura > #LIMITE_TEMP);
+
+	IF NOT #xEmergenciaOk THEN
+	    #codigoFalha := 3;
+	ELSIF #xFalhaInversor THEN
+	    #codigoFalha := 1;
+	ELSIF #sensorInvalido THEN
+	    #codigoFalha := 5;
+	ELSIF #temperaturaAlta THEN
+	    #codigoFalha := 4;
+	ELSIF #heartbeatAusente AND #motorLigado THEN
+	    #codigoFalha := 2;
+	END_IF;
+
+	// ---------------------------------------------------------------- comando do motor (HR11)
+	#comando := WORD_TO_INT(#hr[11]);
+	IF #comando = #CMD_RECONHECER THEN
+	    #causaAtiva := NOT #xEmergenciaOk OR #xFalhaInversor OR #sensorInvalido OR #temperaturaAlta;
+	    IF NOT #causaAtiva THEN
+	        #codigoFalha := 0;
+	    END_IF;
+	    #hr[11] := INT_TO_WORD(#CMD_PARAR);
+	    #comando := #CMD_PARAR;
+	END_IF;
+
+	#podeLigar := #xRemoto AND (#codigoFalha = 0) AND NOT #heartbeatAusente;
+	#motorLigado := (#comando = #CMD_LIGAR) AND #podeLigar;
+
+	// Parada por falha, modo local ou heartbeat: zera o comando para o motor
+	// nunca religar sozinho quando a causa sumir.
+	IF NOT #podeLigar THEN
+	    #hr[11] := INT_TO_WORD(#CMD_PARAR);
+	END_IF;
+
+	// ---------------------------------------------------------------- referencia (HR10) limitada a VEL_MAX
+	#pedida := WORD_TO_DINT(#hr[10]);
+	#aplicada := MIN(IN1 := #pedida, IN2 := #VEL_MAX);
+
+	#qPartida := #motorLigado;
+	IF #motorLigado THEN
+	    #qReferencia := DINT_TO_INT(#AQ_4MA + (#aplicada * (#AQ_20MA - #AQ_4MA)) / #VEL_MAX);
+	ELSE
+	    #qReferencia := DINT_TO_INT(#AQ_4MA);
+	END_IF;
+
+	// ---------------------------------------------------------------- area de leitura (HR0 a HR4)
+	#hr[0] := INT_TO_WORD(#iTemperatura);
+	#hr[3] := DINT_TO_WORD(#aplicada);
+	// Sem realimentacao do inversor (ADR-003): velocidade estimada = referencia aplicada
+	IF #motorLigado THEN
+	    #hr[1] := DINT_TO_WORD(#aplicada);
+	ELSE
+	    #hr[1] := 16#0000;
+	END_IF;
+
+	#status := 16#0000;
+	IF #motorLigado THEN #status := #status OR 16#0001; END_IF;
+	IF #xRemoto THEN #status := #status OR 16#0002; END_IF;
+	IF #xFalhaInversor THEN #status := #status OR 16#0004; END_IF;
+	IF #heartbeatAusente THEN #status := #status OR 16#0008; END_IF;
+	IF #pedida > #VEL_MAX THEN #status := #status OR 16#0010; END_IF;
+	IF NOT #xEmergenciaOk THEN #status := #status OR 16#0020; END_IF;
+	#hr[2] := #status;
+	#hr[4] := INT_TO_WORD(#codigoFalha);
+
+END_FUNCTION_BLOCK

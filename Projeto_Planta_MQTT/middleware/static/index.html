@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Planta MQTT</title>
+  <link rel="stylesheet" href="/static/estilo.css">
+</head>
+<body>
+  <header>
+    <div>
+      <p class="rotulo">Monitoria de Redes, UFPE</p>
+      <h1 id="titulo">Bancada</h1>
+    </div>
+    <div class="conexoes">
+      <span id="chip-broker" class="chip">broker</span>
+      <span id="chip-gateway" class="chip">gateway</span>
+      <span id="chip-clp" class="chip">CLP</span>
+    </div>
+  </header>
+
+  <div id="aviso" class="aviso escondido"></div>
+
+  <main>
+    <section class="cartoes">
+      <article class="cartao">
+        <p class="rotulo">Temperatura</p>
+        <p class="valor"><span id="v-temperatura">--</span><small>°C</small></p>
+      </article>
+      <article class="cartao">
+        <p class="rotulo">Velocidade</p>
+        <p class="valor"><span id="v-velocidade">--</span><small>rpm</small></p>
+      </article>
+      <article class="cartao">
+        <p class="rotulo">Referência aplicada</p>
+        <p class="valor"><span id="v-referencia">--</span><small>rpm</small></p>
+      </article>
+    </section>
+
+    <section class="painel">
+      <h2>Status</h2>
+      <div id="status" class="status"></div>
+    </section>
+
+    <section class="painel">
+      <h2>Última hora</h2>
+      <div class="grafico"><canvas id="grafico"></canvas></div>
+    </section>
+
+    <section class="painel">
+      <h2>Operação</h2>
+      <form id="login" class="login">
+        <p class="nota">Só o operador comanda a bancada. Os demais acompanham os dados ao vivo.</p>
+        <input id="usuario" autocomplete="username" placeholder="usuário (ex.: operador_bancada1)">
+        <input id="senha" type="password" autocomplete="current-password" placeholder="senha">
+        <button type="submit">Entrar como operador</button>
+        <p id="erro-login" class="erro"></p>
+      </form>
+
+      <div id="controles" class="controles escondido">
+        <label for="ref">Referência de velocidade: <strong><span id="ref-valor">0</span> rpm</strong></label>
+        <input id="ref" type="range" min="0" step="10" value="0">
+        <div class="botoes">
+          <button id="b-ref" class="secundario">Enviar referência</button>
+          <button id="b-ligar" class="ligar">Ligar</button>
+          <button id="b-parar" class="parar">Parar</button>
+          <button id="b-reconhecer" class="secundario">Reconhecer falha</button>
+        </div>
+        <p id="resposta" class="resposta">Nenhum comando enviado.</p>
+        <button id="b-sair" class="link">Sair do modo operador</button>
+      </div>
+    </section>
+
+    <section class="painel">
+      <h2>Últimos comandos</h2>
+      <ul id="comandos" class="comandos"></ul>
+      <a class="exportar" href="/exportar.csv">Baixar medições (CSV)</a>
+    </section>
+  </main>
+
+  <script src="/config.js"></script>
+  <script src="/static/vendor/mqtt-5.16.0.min.js"></script>
+  <script src="/static/vendor/chart-4.5.1.umd.min.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

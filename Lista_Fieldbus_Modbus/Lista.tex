@@ -1,0 +1,409 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[brazil]{babel}
+\usepackage[sfdefault,lf]{FiraSans}
+\usepackage{FiraMono}
+\usepackage[a4paper,margin=2.2cm,top=2.4cm,bottom=2.4cm]{geometry}
+\usepackage[table]{xcolor}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage[most]{tcolorbox}
+\usepackage{titlesec}
+\usepackage{needspace}
+
+% Paleta: acento ciano do tema industrial, escurecido para papel branco
+\definecolor{Ink}{HTML}{1F2937}
+\definecolor{Muted}{HTML}{5B6677}
+\definecolor{Navy}{HTML}{111827}
+\definecolor{Accent}{HTML}{0B7F7D}
+\definecolor{AccentBright}{HTML}{16D5D2}
+\definecolor{AccentSoft}{HTML}{EAF6F6}
+\definecolor{Amber}{HTML}{B7791F}
+\definecolor{PacketBg}{HTML}{F3F4F6}
+\definecolor{RuleGray}{HTML}{C9D1DB}
+
+\color{Ink}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.35em}
+\renewcommand{\arraystretch}{1.35}
+\arrayrulecolor{RuleGray}
+
+% Cabeçalho e rodapé
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot[L]{\small\color{Muted}Lista de Exercícios: Fieldbus, RS232/RS485 e Modbus}
+\fancyfoot[R]{\small\color{Accent}\bfseries\thepage}
+\fancypagestyle{plain}{\fancyhf{}\fancyfoot[R]{\small\color{Accent}\bfseries\thepage}}
+
+% Subseções (5.A, 5.B...)
+\titleformat{\subsection}[block]{\large\bfseries\color{Navy}}{}{0pt}{}[{\color{AccentBright}\titlerule[1.2pt]}]
+\titlespacing*{\subsection}{0pt}{1.4em}{0.6em}
+
+% Faixa de abertura de cada parte
+\newcommand{\parte}[3]{%
+  \par\needspace{9\baselineskip}\vspace{1.2em}%
+  \begin{tcolorbox}[enhanced, colback=Navy, colframe=Navy, arc=2pt,
+    left=10pt, right=10pt, top=8pt, bottom=8pt, boxrule=0pt]
+    {\color{AccentBright}\bfseries\Large Parte #1}\hspace{0.8em}{\color{white}\bfseries\Large #2}\\[2pt]
+    {\color{white!75!Navy}\small #3}
+  \end{tcolorbox}\vspace{0.3em}}
+
+% Número de questão
+\newcommand{\q}[1]{\par\vspace{0.9em}\noindent{\color{Accent}\bfseries #1}\hspace{0.7em}}
+
+% Texto de apoio
+\newtcolorbox{apoio}[1][Texto de apoio]{enhanced, breakable,
+  colback=AccentSoft, colframe=Accent, boxrule=0pt, leftrule=3pt, arc=0pt,
+  left=10pt, right=10pt, top=6pt, bottom=6pt,
+  fonttitle=\bfseries\small, coltitle=Accent, colbacktitle=AccentSoft,
+  fontupper=\small, title={#1}, attach title to upper={\par\smallskip}}
+
+% Pacote hexadecimal
+\newtcolorbox{pacote}[1]{enhanced, colback=PacketBg, 
+  boxrule=0pt, leftrule=3pt, colframe=Amber, arc=0pt,
+  left=10pt, right=10pt, top=5pt, bottom=5pt,
+  fonttitle=\bfseries\footnotesize, coltitle=Amber, colbacktitle=PacketBg,
+  title={#1}, attach title to upper={\par\smallskip}}
+\newcommand{\bytes}[2]{{\footnotesize\bfseries\color{Muted}\makebox[2.2cm][l]{#1}}{\ttfamily #2}\par}
+
+% Cabeçalho de tabela
+\newcommand{\thd}[1]{\textcolor{white}{\bfseries #1}}
+
+
+
+\begin{document}
+
+% ---------------------------------------------------------------- Capa
+\begin{tcolorbox}[enhanced, colback=Navy, colframe=Navy, arc=3pt, boxrule=0pt,
+  left=14pt, right=14pt, top=14pt, bottom=14pt,
+  overlay={\fill[AccentBright] (frame.north west) rectangle ([yshift=-4pt]frame.north east);}]
+  {\color{AccentBright}\bfseries\small LISTA DE EXERCÍCIOS}\\[4pt]
+  {\color{white}\bfseries\LARGE Fieldbus, RS232/RS485 e Modbus}\\[8pt]
+  {\color{white!75!Navy}Monitoria de Introdução às Redes de Comunicação, UFPE \hfill 2026.2}
+\end{tcolorbox}
+
+\vspace{0.6em}
+Responda com suas palavras. Nas questões numéricas e de montagem de pacotes, mostre o raciocínio. Os valores dos pacotes estão em hexadecimal.
+
+\vspace{0.4em}
+{\small
+\begin{tabularx}{\linewidth}{>{\bfseries\color{Accent}}c X >{\raggedright\arraybackslash}p{5.2cm} c}
+\rowcolor{Navy}\thd{Parte} & \thd{Tema} & \thd{Referência} & \thd{Questões} \\
+1 & Surgimento e evolução dos sistemas Fieldbus & Artigo \emph{Evolution potentials for fieldbus systems} e Livro, Cap. 7 & 11 \\
+2 & A guerra dos Fieldbus e a padronização IEC & Artigo \emph{The fieldbus war: history or short break between battles?} & 3 \\
+3 & RS232: DTE versus DCE & Texto de apoio & 6 \\
+4 & Meio físico: RS232, RS485 e CSMA/CD & Normas TIA/EIA-232-F, TIA/EIA-485-A e IEEE 802.3 & 11 \\
+5 & Modbus: funções, RTU, TCP e segurança & Especificações da Modbus Organization (modbus.org) & 35 \\
+\bottomrule
+\end{tabularx}}
+
+% ---------------------------------------------------------------- Parte 1
+\parte{1}{Surgimento e evolução dos Fieldbus}{Artigo \emph{Evolution potentials for fieldbus systems} e Livro, Cap. 7 \emph{Fieldbus Systems: History and Evolution}}
+
+\q{1.1} Cite duas principais motivações para o surgimento das redes Fieldbus.
+
+\q{1.2} Leia o texto de apoio abaixo e responda.
+
+\begin{apoio}[Texto de apoio: a pirâmide de automação]
+A pirâmide de automação é um modelo que descreve a estrutura hierárquica da automação industrial. Ela representa como diferentes sistemas se conectam e interagem para formar um sistema de automação de fábrica ou processo. A classificação reflete os diferentes níveis desta pirâmide:
+
+\begin{itemize}[leftmargin=1.2em, itemsep=2pt, topsep=3pt]
+\item \textbf{Nível 0, Campo:} abrange dispositivos no campo, como sensores e atuadores. Responsável pela coleta de dados básicos e execução de comandos de controle.
+\item \textbf{Nível 1, Controle:} inclui controladores, como CLPs (Controladores Lógicos Programáveis) e RTUs (Unidades Terminais Remotas). Interpreta os dados do campo e executa ações de controle.
+\item \textbf{Nível 2, Supervisão:} envolve sistemas SCADA (Supervisão, Controle e Aquisição de Dados) e DCS (Sistemas de Controle Distribuído). Coleta dados dos sistemas de controle, apresenta informações de forma visual e permite controle manual ou automatizado.
+\item \textbf{Nível 3, Gerenciamento de Produção:} abrange sistemas MES (Sistemas de Execução de Manufatura). Fornece informações em tempo real para gerenciar operações de produção, como planejamento, agendamento e rastreamento de produção.
+\item \textbf{Nível 4, Gerenciamento Corporativo:} inclui sistemas ERP (Planejamento de Recursos Empresariais). Interage com os níveis inferiores para fornecer informações estratégicas de gerenciamento, como finanças, cadeia de suprimentos e logística.
+\end{itemize}
+
+O modelo da pirâmide de automação foi concebido para fornecer uma visão clara da estrutura organizacional necessária para a automação integrada, servindo como base para a Manufatura Integrada por Computador (CIM). Cada nível na pirâmide desempenha um papel distinto, mas todos trabalham juntos para fornecer automação eficiente e transparente.
+
+A pirâmide de automação é baseada na norma ISA-95 (também conhecida como IEC 62264). Esta norma internacional define um modelo padrão para a integração entre sistemas de controle de fábrica (níveis 0 a 2) e sistemas de gestão empresarial (nível 4), estabelecendo padrões para o intercâmbio de informações entre esses níveis. A ISA-95 descreve os seguintes níveis:
+
+\begin{itemize}[leftmargin=1.2em, itemsep=2pt, topsep=3pt]
+\item \textbf{Nível 0:} representa o processo físico real.
+\item \textbf{Nível 1:} inclui dispositivos de campo, como sensores e atuadores que interagem diretamente com o processo.
+\item \textbf{Nível 2:} sistemas de controle, como CLPs e RTUs, que coletam dados do campo e controlam diretamente os dispositivos.
+\item \textbf{Nível 3:} sistemas de gerenciamento de operações de produção, como MES, que supervisionam e controlam a produção.
+\item \textbf{Nível 4:} sistemas de gestão corporativa, como ERP, que fornecem informações estratégicas para a gestão do negócio.
+\end{itemize}
+
+A ISA-95 foi desenvolvida para facilitar a integração entre sistemas de gestão e controle, proporcionando uma estrutura comum para a troca de informações e melhorando a eficiência operacional.
+\end{apoio}
+
+Com base nisso, as redes fieldbus encontram-se em qual camada da pirâmide da automação? Justifique usando as duas numerações apresentadas (pirâmide clássica e ISA-95).
+
+\q{1.3} Qual padrão de meio físico precedeu praticamente todas as redes de campo industrial?
+
+\q{1.4} Leia o texto de apoio e responda.
+
+\begin{apoio}[Texto de apoio: MAP e Mini-MAP]
+Uma grande contribuição veio a partir das redes de computadores, quando o modelo ISO/OSI foi introduzido. Este modelo de referência é ponto de partida para o desenvolvimento de muitos protocolos de comunicação complexos.
+
+A primeira aplicação do modelo OSI ao domínio da automação foi a definição da rede MAP (Manufacturing Automation Protocol) na esteira da ideia CIM. O MAP pretendia ser uma estrutura para o controle abrangente de processos industriais, e o resultado da definição foi um protocolo poderoso e flexível, mas também muito complexo. Posteriormente, surgiu o padrão mais rígido chamado de Mini-MAP, que também não teve o sucesso esperado.
+\end{apoio}
+
+O que fez com que a rede MAP fosse redimensionada para a rede Mini-MAP?
+
+\q{1.5} Explique quais as vantagens de se ter interoperabilidade em sistemas industriais.
+
+\q{1.6} Quais são os principais benefícios trazidos pelos sistemas Fieldbus em comparação com os sistemas de cabeamento ponto a ponto?
+
+\q{1.7} Quais camadas do modelo OSI um sistema Fieldbus normalmente usa? Por que as demais costumam ser omitidas?
+
+\q{1.8} Quais foram os dois projetos europeus que protagonizaram a “guerra dos Fieldbus”?
+
+\q{1.9} Qual foi a solução adotada pela IEC para resolver o impasse na padronização?
+
+\q{1.10} O que é o IEC 61784 e qual sua relação com o IEC 61158?
+
+\q{1.11} Quais são os três paradigmas de comunicação discutidos no capítulo? Dê uma característica de cada um.
+
+% ---------------------------------------------------------------- Parte 2
+\parte{2}{A guerra dos Fieldbus}{Artigo \emph{The fieldbus war: history or short break between battles?}}
+
+\q{2.1} Leia o contexto e responda.
+
+\begin{apoio}[Contexto]
+Na segunda metade da década de 1980, no início dos esforços da IEC no comitê técnico TC65C, o desenvolvimento de sistemas fieldbus era principalmente um empreendimento europeu, impulsionado por projetos de pesquisa que ainda tinham uma forte formação acadêmica, bem como por muitos desenvolvimentos proprietários. Os resultados mais promissores foram o FIP francês e o PROFIBUS alemão.
+\end{apoio}
+
+Em relação aos paradigmas de comunicação existentes, explique com detalhes qual era o da arquitetura FIP e qual era o da arquitetura PROFIBUS.
+
+\q{2.2} Leia o contexto e responda.
+
+\begin{apoio}[Contexto]
+No dia 15 de junho de 1999, o Comitê da IEC decidiu seguir um caminho completamente novo para quebrar o impasse. Um mês depois, no dia 16 de julho, os representantes dos principais concorrentes no debate (Fieldbus Foundation, Fisher Rosemount, ControlNet International, Rockwell Automation, organização de usuários PROFIBUS e Siemens) assinaram um “Memorando de Entendimento”, que pretendia pôr fim à guerra do fieldbus. A resolução foi criar um padrão IEC 61158 grande e abrangente, acomodando todos os sistemas fieldbus. Com grande esforço e sob substancial pressão de tempo, o projeto foi compilado, submetido para votação e divulgado como padrão em 31 de dezembro de 2000.
+
+Ficou evidente que a coleta de especificações de fieldbus na norma IEC 61158 é inútil para qualquer implementação. É necessário um manual para uso prático mostrando quais partes podem ser compiladas para um sistema funcional e como isso pode ser feito. Esta diretriz foi compilada posteriormente como IEC 61784, como uma definição dos chamados “perfis”.
+\end{apoio}
+
+Quais padrões compuseram inicialmente a norma IEC 61784?
+
+\q{2.3} Como a Ethernet encontrada nas primeiras redes de computadores foi incorporada com sucesso às redes de campo industrial?
+
+% ---------------------------------------------------------------- Parte 3
+\parte{3}{RS232: DTE versus DCE}{Texto de apoio}
+
+\begin{apoio}
+Na especificação RS232, \textbf{DTE} (\emph{Data Terminal Equipment}, equipamento terminal de dados) e \textbf{DCE} (\emph{Data Communications Equipment}, equipamento de comunicação de dados) são os dois tipos de equipamento que ficam nas pontas de uma conexão serial. Em geral, o DTE é o computador e o DCE é o modem.
+
+Como a RS232 foi pensada principalmente para ligar um DTE a um DCE, a pinagem dos dois lados foi definida para que o cabo fosse o mais simples possível: o pino 1 de um lado liga no pino 1 do outro, o pino 2 no pino 2, e assim por diante. Esse tipo de cabo é chamado de \textbf{cabo direto} (\emph{straight-through}), e ainda é o padrão para ligar um modem a um PC.
+
+O problema aparece quando se quer ligar dois DTEs diretamente, sem modem, o que é muito comum. Com um cabo direto entre dois DTEs, o transmissor de um fica ligado ao transmissor do outro, e o receptor ao receptor, e nenhuma comunicação acontece. Nesse caso é preciso um cabo que cruze as linhas, ligando o transmissor de um equipamento ao receptor do outro e vice-versa. Esse cabo é chamado de \textbf{null-modem}, porque substitui os dois modems que uma aplicação RS232 tradicional colocaria entre os dois DTEs.
+\end{apoio}
+
+\q{3.1} Defina DTE e DCE e dê um exemplo de equipamento de cada tipo.
+
+\q{3.2} Por que a pinagem da RS232 permite ligar um DTE a um DCE com um cabo direto?
+
+\q{3.3} Explique o que acontece, no nível dos sinais TX e RX, quando dois DTEs são ligados com um cabo direto.
+
+\q{3.4} O que é um cabo null-modem e de onde vem esse nome?
+
+\q{3.5} Você precisa ligar um notebook (via adaptador USB-serial) à porta serial de programação de um CLP, que também se comporta como DTE. Qual cabo você usa? E se a ligação fosse notebook para modem?
+
+\q{3.6} Num conector DB9 de um DTE, o pino 2 é RX, o pino 3 é TX e o pino 5 é o terra de sinal (GND). Desenhe as ligações mínimas (três fios) de um cabo null-modem entre dois DB9 de DTEs.
+
+% ---------------------------------------------------------------- Parte 4
+\parte{4}{Meio físico: RS232, RS485 e CSMA/CD}{Normas TIA/EIA-232-F (RS232), TIA/EIA-485-A (RS485) e IEEE 802.3 (Ethernet, CSMA/CD)}
+
+\q{4.1} A RS232 usa transmissão \emph{single-ended} (referenciada ao terra) e a RS485 usa transmissão \emph{diferencial}. Explique a diferença entre as duas e por que a diferencial é mais imune a ruído em ambiente industrial.
+
+\q{4.2} Compare RS232 e RS485 preenchendo a tabela:
+
+\vspace{0.3em}
+\renewcommand{\arraystretch}{1.9}
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{6.4cm} X X}
+\rowcolor{Navy}\thd{Característica} & \thd{RS232} & \thd{RS485} \\
+Tipo de sinal & & \\
+Topologia (ponto a ponto ou multiponto) & & \\
+Número de dispositivos no barramento & & \\
+Distância máxima típica & & \\
+Taxa de transmissão típica & & \\
+Full-duplex ou half-duplex (versão a 2 fios) & & \\
+\bottomrule
+\end{tabularx}
+
+\q{4.3} Cite pelo menos três vantagens da RS485 sobre a RS232 para uma rede de campo que liga um CLP a vários inversores de frequência espalhados pelo chão de fábrica.
+
+\q{4.4} Para que servem os resistores de terminação (tipicamente 120\,$\Omega$) nas pontas de um barramento RS485? Onde eles devem ser colocados?
+
+\q{4.5} A RS485 define protocolo de comunicação? Em qual camada do modelo OSI ela se encaixa, e o que é preciso adicionar por cima para que dois equipamentos troquem dados de verdade?
+
+\q{4.6} Numa RS485 a 2 fios, todos os dispositivos compartilham o mesmo par. O que aconteceria se dois dispositivos transmitissem ao mesmo tempo? Como o Modbus RTU evita que isso aconteça? (retome esta questão na Parte 5)
+
+\q{4.7} Explique o funcionamento do \textbf{CSMA/CD} (\emph{Carrier Sense Multiple Access with Collision Detection}), descrevendo o que significa cada parte da sigla.
+
+\q{4.8} O que é o algoritmo de \emph{backoff} exponencial binário e por que ele é usado depois de uma colisão?
+
+\q{4.9} Na Ethernet a 10\,Mbit/s, o quadro mínimo é de 64 bytes. Calcule o tempo que leva para transmitir esse quadro e explique por que existe um tamanho mínimo de quadro no CSMA/CD.
+
+\q{4.10} Por que o CSMA/CD é considerado \textbf{não determinístico}? Por que isso foi, historicamente, um argumento contra o uso de Ethernet no chão de fábrica?
+
+\q{4.11} Em uma rede Ethernet moderna com \emph{switches} e enlaces \emph{full-duplex}, o CSMA/CD ainda atua? Explique o que mudou.
+
+% ---------------------------------------------------------------- Parte 5
+\parte{5}{Modbus}{Modbus Organization (modbus.org): \emph{MODBUS Application Protocol Specification} V1.1b3, \emph{MODBUS over Serial Line Specification and Implementation Guide} V1.02 e \emph{MODBUS Messaging on TCP/IP Implementation Guide} V1.0b}
+
+\subsection{5.A \quad Conceitos gerais}
+
+\q{5.1} Em qual camada do modelo OSI o Modbus está definido? O que muda entre Modbus RTU, Modbus ASCII e Modbus TCP?
+
+\q{5.2} Explique a relação mestre/escravo (no Modbus serial) ou cliente/servidor (no Modbus TCP). Um escravo pode iniciar uma comunicação por conta própria?
+
+\q{5.3} O modelo de dados do Modbus tem quatro tabelas. Complete:
+
+\vspace{0.3em}
+\renewcommand{\arraystretch}{1.9}
+\begin{tabularx}{\linewidth}{>{\bfseries}l X X X}
+\rowcolor{Navy}\thd{Tabela} & \thd{Tamanho de cada item} & \thd{Leitura/Escrita} & \thd{Exemplo de uso} \\
+Coils & & & \\
+Discrete Inputs & & & \\
+Input Registers & & & \\
+Holding Registers & & & \\
+\bottomrule
+\end{tabularx}
+
+\needspace{20\baselineskip}
+\subsection{5.B \quad Funções}
+
+\q{5.4} Complete a tabela com as funções mais importantes do Modbus:
+
+\vspace{0.3em}
+\renewcommand{\arraystretch}{1.9}
+\begin{tabularx}{\linewidth}{>{\bfseries\color{Accent}}c c X X}
+\rowcolor{Navy}\thd{Código (dec.)} & \thd{Código (hex)} & \thd{Nome} & \thd{Tabela acessada} \\
+1 & & & \\
+2 & & & \\
+3 & & & \\
+4 & & & \\
+5 & & & \\
+6 & & & \\
+15 & & & \\
+16 & & & \\
+\bottomrule
+\end{tabularx}
+
+\q{5.5} Qual a diferença entre as funções 6 e 16? Em que situação vale a pena usar a 16 mesmo para escrever poucos registradores?
+
+\q{5.6} Qual a diferença entre as funções 3 e 4? Por que não existe uma função de escrita para Input Registers?
+
+\q{5.7} Na função 5 (\emph{Write Single Coil}), quais valores são enviados no campo de dados para ligar e para desligar a bobina?
+
+\q{5.8} Quando um escravo não consegue atender uma requisição, ele devolve uma \textbf{resposta de exceção}. Como o código de função é modificado nessa resposta? Explique o significado dos códigos de exceção 01, 02, 03 e 04.
+
+\subsection{5.C \quad Modbus RTU e controle de acesso ao meio}
+
+\q{5.9} Descreva os campos de um quadro Modbus RTU (endereço, função, dados, CRC), dizendo o tamanho de cada um.
+
+\q{5.10} Qual a faixa de endereços válidos de escravos no Modbus RTU? O que acontece quando o mestre envia uma mensagem para o endereço 0?
+
+\q{5.11} Explique o \textbf{controle de acesso ao meio} no Modbus RTU. Por que não há colisões em um barramento RS485 com Modbus RTU, mesmo sem nenhum mecanismo como o CSMA/CD?
+
+\q{5.12} Esse método de acesso ao meio é determinístico? Como você estimaria o tempo máximo para o mestre ler todos os escravos de uma rede?
+
+\q{5.13} No Modbus RTU não há um caractere de início nem de fim de quadro. Como o receptor sabe onde um quadro termina? Explique o intervalo de silêncio de 3,5 tempos de caractere.
+
+\q{5.14} No Modbus RTU cada caractere tem 11 bits (1 start, 8 dados, 1 paridade ou 1 stop extra, 1 stop). Calcule o intervalo de silêncio de 3,5 caracteres a 9600\,bit/s.
+
+\q{5.15} Para que serve o CRC no final do quadro RTU? Que tipo de erro ele detecta?
+
+\q{5.16} Decodifique a requisição Modbus RTU abaixo, identificando cada campo.
+
+\begin{pacote}{Modbus RTU}
+\bytes{Requisição}{11 03 00 6B 00 03 76 87}
+\end{pacote}
+
+\q{5.17} Decodifique a resposta correspondente e diga quais valores (em decimal) foram lidos em cada registrador.
+
+\begin{pacote}{Modbus RTU}
+\bytes{Resposta}{11 03 06 AE 41 56 52 43 40 49 AD}
+\end{pacote}
+
+\q{5.18} Monte (sem o CRC) a requisição Modbus RTU para que o mestre escreva o valor 1000 (decimal) no holding register de endereço 10 do escravo 5, usando a função 6.
+
+\subsection{5.D \quad Modbus TCP e controle de acesso ao meio}
+
+\q{5.19} O que é o cabeçalho \textbf{MBAP}? Descreva cada um dos seus campos (Transaction Identifier, Protocol Identifier, Length, Unit Identifier) e o tamanho de cada um.
+
+\q{5.20} Por que o quadro Modbus TCP não tem CRC, ao contrário do RTU? Quem faz a verificação de erros nesse caso?
+
+\q{5.21} Qual a porta TCP padrão do Modbus TCP? Quem abre a conexão, o cliente ou o servidor?
+
+\q{5.22} Para que serve o Unit Identifier, já que no Modbus TCP o dispositivo é identificado pelo endereço IP? Dê um exemplo de situação em que ele é essencial (pense em um \emph{gateway} Modbus TCP para Modbus RTU).
+
+\q{5.23} Explique o \textbf{controle de acesso ao meio} no Modbus TCP. O Modbus TCP define algum mecanismo próprio de acesso ao meio ou ele depende de outra camada? Compare com o Modbus RTU.
+
+\q{5.24} Considere uma rede Modbus TCP com um \emph{hub} antigo (half-duplex) e outra com um \emph{switch} (full-duplex). Em qual das duas o CSMA/CD pode causar atrasos imprevisíveis? Justifique.
+
+\q{5.25} Decodifique a requisição Modbus TCP abaixo.
+
+\begin{pacote}{Modbus TCP}
+\bytes{Requisição}{00 01 00 00 00 06 01 03 00 00 00 02}
+\end{pacote}
+
+\q{5.26} Decodifique a resposta abaixo e explique por que o campo Length vale 7.
+
+\begin{pacote}{Modbus TCP}
+\bytes{Resposta}{00 01 00 00 00 07 01 03 04 00 0A 00 14}
+\end{pacote}
+
+\q{5.27} O que significa a resposta abaixo? Qual foi o provável erro do cliente?
+
+\begin{pacote}{Modbus TCP}
+\bytes{Resposta}{00 02 00 00 00 03 01 83 02}
+\end{pacote}
+
+\q{5.28} Monte a requisição Modbus TCP completa (MBAP + PDU) para escrever os valores 100 e 200 (decimal) nos holding registers 0 e 1 do dispositivo com Unit ID 1, usando a função 16 e Transaction ID 5.
+
+\subsection{5.E \quad Mais pacotes}
+
+\begin{apoio}[Atenção]
+Nesta seção, todos os endereços são base zero (o primeiro item de cada tabela tem endereço 0).
+\end{apoio}
+
+\q{5.29} Decodifique a requisição e a resposta Modbus TCP abaixo. Quantas coils foram lidas, a partir de qual endereço, e qual o estado (ligada ou desligada) de cada uma? Explique por que o campo Length da resposta vale 5.
+
+\begin{pacote}{Modbus TCP}
+\bytes{Requisição}{00 03 00 00 00 06 01 01 00 13 00 0A}
+\bytes{Resposta}{00 03 00 00 00 05 01 01 02 CD 01}
+\end{pacote}
+
+\q{5.30} Decodifique a requisição e a resposta Modbus TCP abaixo. Qual tabela do modelo de dados foi acessada e qual valor (em decimal) foi lido?
+
+\begin{pacote}{Modbus TCP}
+\bytes{Requisição}{00 04 00 00 00 06 01 04 00 08 00 01}
+\bytes{Resposta}{00 04 00 00 00 05 01 04 02 00 0A}
+\end{pacote}
+
+\q{5.31} Monte (sem o CRC) a requisição Modbus RTU para que o mestre \textbf{ligue} a coil de endereço 172 do escravo 17, usando a função 5. O que muda no quadro para \textbf{desligar} a mesma coil?
+
+\q{5.32} Monte a requisição Modbus TCP completa (MBAP + PDU) para escrever, com a função 15, os estados abaixo nas coils de endereço 19 a 28 do dispositivo com Unit ID 1, usando Transaction ID 7. Mostre como os bits são agrupados nos bytes de dados.
+
+\vspace{0.3em}
+\begin{center}
+\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{>{\bfseries}l *{10}{c}}
+\rowcolor{Navy}\thd{Endereço} & \thd{19} & \thd{20} & \thd{21} & \thd{22} & \thd{23} & \thd{24} & \thd{25} & \thd{26} & \thd{27} & \thd{28} \\
+Estado & 1 & 0 & 1 & 1 & 0 & 0 & 1 & 1 & 1 & 0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\q{5.33} Um mestre Modbus RTU recebeu a resposta abaixo (CRC omitido). Qual escravo respondeu, a qual função ele está respondendo, e o que deu errado?
+
+\begin{pacote}{Modbus RTU, CRC omitido}
+\bytes{Resposta}{0A 81 02}
+\end{pacote}
+
+\subsection{5.F \quad Segurança}
+
+\q{5.34} Olhando os quadros das seções 5.D e 5.E, existe algum campo de autenticação ou de criptografia no Modbus TCP? Que consequência isso tem para alguém que consiga se conectar na porta 502 do CLP?
+
+\q{5.35} Cite duas medidas de rede que reduzem esse risco sem alterar o protocolo Modbus.
+
+\end{document}
