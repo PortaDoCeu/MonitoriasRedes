@@ -30,7 +30,7 @@ DESTINO = RAIZ / "aula" / "projeto_aluno"
 
 COPIAR = [
     "contrato.py", "config.py", "clp_simulado.py", "config.exemplo.env",
-    "requirements.txt", "iniciar.ps1", "parar.ps1",
+    "requirements.txt", "iniciar.ps1", "parar.ps1", "iniciar.bat", "parar.bat",
     "middleware/static", "img", "clp", "aula/Aula.ipynb", "Arquitetura.md", "decisoes",
 ]
 COM_LACUNAS = ["gateway/gateway.py", "middleware/middleware.py"]

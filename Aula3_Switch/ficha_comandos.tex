@@ -1,0 +1,65 @@
+% !TEX program = xelatex
+% Ficha de comandos: uma por grupo. O grupo escreve os comandos ANTES de ir ao switch;
+% o monitor confere e assina.
+\documentclass[11pt]{article}
+\usepackage[brazil]{babel}
+\usepackage[sfdefault,lf]{FiraSans}
+\usepackage{FiraMono}
+\usepackage[a4paper,margin=1.6cm]{geometry}
+\usepackage[table]{xcolor}
+\usepackage{array,tabularx,booktabs}
+\definecolor{Navy}{HTML}{111827}
+\definecolor{Ciano}{HTML}{0B7F7D}
+\definecolor{Cinza}{HTML}{5B6677}
+\definecolor{RuleGray}{HTML}{C9D1DB}
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\arrayrulecolor{RuleGray}
+\newcommand{\cab}[1]{\textcolor{white}{\bfseries #1}}
+\newcommand{\linhas}[1]{\par\foreach\i in {1,...,#1}{\rule{\linewidth}{0.4pt}\par\vspace{0.46cm}}}
+\usepackage{pgffor}
+\newcommand{\tarefa}[2]{\vspace{0.35cm}{\color{Ciano}\bfseries\large Tarefa #1:} {\bfseries #2}\par\vspace{0.15cm}}
+\newcommand{\visto}{\hfill{\small\color{Cinza}Visto do monitor: \rule{3.2cm}{0.4pt}}\par}
+
+\begin{document}
+
+{\color{Navy}\bfseries\LARGE Ficha de comandos}\hfill{\large Grupo: \rule{1.5cm}{0.4pt}\quad Portas: \rule{2cm}{0.4pt}}
+
+\vspace{0.1cm}
+{\small\color{Cinza}Escrevam os comandos aqui \textbf{antes} do seu turno no switch. Sem o visto do monitor, não digite.}
+
+\tarefa{1}{mapear a célula}
+\renewcommand{\arraystretch}{1.45}
+\begin{tabularx}{\textwidth}{|c|X|X|X|}
+\rowcolor{Navy}\cab{Porta} & \cab{Equipamento} & \cab{MAC} & \cab{IP} \\ \hline
+\hspace{1.2cm} & & & \\ \hline
+ & & & \\ \hline
+ & & & \\ \hline
+ & & & \\ \hline
+ & & & \\ \hline
+\end{tabularx}
+
+\tarefa{2}{isolar a célula (VLAN)}
+\linhas{5}
+\visto
+
+\tarefa{3}{monitorar (mirror para a porta 35)}
+\linhas{2}
+{\small Para desfazer no fim do turno:}
+\linhas{1}
+\visto
+
+\tarefa{4}{endurecer}
+\linhas{4}
+\visto
+
+\vspace{0.2cm}
+{\color{Ciano}\bfseries Provas que o grupo apresenta}
+\begin{itemize}\setlength{\itemsep}{0pt}\small
+\item PUT/GET funcionando entre os dois CLPs da célula, antes e depois da VLAN
+\item \texttt{ping} para o CLP da própria célula responde; para o de outra célula, não
+\item Print do Wireshark com um pacote S7comm explicado: quem lê, quem escreve, o quê, e onde estaria a senha
+\item Notebook plugado no lugar do CLP sem comunicação; porta livre sem link
+\end{itemize}
+
+\end{document}
