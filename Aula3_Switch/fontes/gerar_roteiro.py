@@ -1,6 +1,6 @@
-"""Gera Aula.ipynb (roteiro do aluno da Aula 3) e embute as imagens.
+"""Gera ../Aula.ipynb (roteiro do aluno da Aula 3) e embute as imagens de img/.
 
-Uso (na pasta Aula3_Switch):
+Uso (na pasta Aula3_Switch/fontes, ou pelo compilar.ps1):
     python gerar_roteiro.py
 """
 
@@ -315,5 +315,6 @@ for i, cel in enumerate(nb["cells"]):
         cel["source"] = novo.splitlines(keepends=True)
         cel["attachments"] = anexos
 
-(PASTA / "Aula.ipynb").write_text(json.dumps(nb, ensure_ascii=False, indent=1), encoding="utf-8")
+# o roteiro vai para a raiz da aula, junto com o resto do material de entrega
+(PASTA.parent / "Aula.ipynb").write_text(json.dumps(nb, ensure_ascii=False, indent=1), encoding="utf-8")
 print("células:", len(celulas))
