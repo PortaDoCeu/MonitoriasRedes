@@ -1,1 +1,35 @@
 node_modules
+
+# ---------------------------------------------------------------- temporários do LaTeX
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.synctex.gz
+
+# ---------------------------------------------------------------- arquivos de trava do Office
+~$*
+
+# ---------------------------------------------------------------- material do monitor (fica só no computador)
+# Guias, gabaritos, checklists, roteiros de fala e slides com notas têm as respostas.
+*.pptx
+*_notas.pdf
+*_notas.tex
+guia_monitor.pdf
+gabarito_comandos.md
+checklist_monitor.md
+mensagem_alunos.md
+**/guia/
+**/gabarito_broker/
+Aula3_Switch/fontes/slides_aula3.tex
+Projeto_Planta_MQTT/aula/slides_projeto.tex
+
+# solução do projeto MQTT (os alunos recebem o esqueleto)
+Projeto_Planta_MQTT/gateway/gateway.py
+Projeto_Planta_MQTT/middleware/middleware.py
+Projeto_Planta_MQTT/testes/
+
+# ---------------------------------------------------------------- arquivos gerados
+Projeto_Planta_MQTT/aula/projeto_aluno.zip
