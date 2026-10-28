@@ -33,3 +33,22 @@ Projeto_Planta_MQTT/testes/
 
 # ---------------------------------------------------------------- arquivos gerados
 Projeto_Planta_MQTT/aula/projeto_aluno.zip
+
+# passo a passo do monitor
+passo_a_passo_monitor.md
+**/config_antes_da_aula.txt
+
+# PDFs de estudo do monitor (celular)
+*_estudo.pdf
+*_estudo.tex
+preparacao_celular.pdf
+
+# Projeto_Sniffer_IDS: ambiente e arquivos gerados
+.venv/
+alertas.csv
+carga.pcap
+__pycache__/
+Projeto_Sniffer_IDS/aula/temporarios/
+Projeto_Sniffer_IDS/aula/pasta_aluno/
+Projeto_Sniffer_IDS/aula/pasta_aluno.zip
+Projeto_Sniffer_IDS/aula/slides_sniffer.tex

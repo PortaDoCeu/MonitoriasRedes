@@ -42,6 +42,8 @@ Compilar "." "slides_aula3_notas.tex" 2
 Compilar "." "mapa_bancada.tex" 1
 Compilar "." "ficha_comandos.tex" 1
 Compilar "guia" "guia_monitor.tex" 3
+Compilar "." "slides_aula3_estudo.tex" 2
+Compilar "guia" "preparacao_celular.tex" 3
 
 Write-Host "PowerPoint"
 $pptx = Join-Path $raiz "slides_aula3.pptx"
